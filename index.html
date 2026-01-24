@@ -1,0 +1,738 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>workout-app</title>
+  <style>
+    :root{
+      --bg:#f3f4f6;
+      --card:#ffffff;
+      --shadow: 0 10px 25px rgba(0,0,0,.08);
+      --radius:22px;
+      --text:#111827;
+      --muted:#6b7280;
+
+      --genki:#dff7f1;
+      --futsu:#fff2d6;
+      --shindoi:#ffe0e3;
+      --kyusoku:#e5e7ff;
+
+      --accent:#ff7a18;
+      --accent2:#ffb703;
+    }
+    *{box-sizing:border-box;}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, "Hiragino Sans", "Noto Sans JP", "Segoe UI", Arial, sans-serif;
+      background:var(--bg);
+      color:var(--text);
+    }
+    .wrap{
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 24px 16px 92px;
+    }
+    h1{
+      text-align:center;
+      margin: 10px 0 18px;
+      font-size: 40px;
+      letter-spacing: .02em;
+    }
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin: 10px 0 18px;
+    }
+    .mood{
+      border:0;
+      background:var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 22px 18px;
+      min-height: 92px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size: 26px;
+      font-weight: 800;
+      cursor:pointer;
+      transition: transform .08s ease;
+      user-select:none;
+    }
+    .mood:active{ transform: scale(.98); }
+    .mood small{
+      display:block;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+    .mood.genki{ background: var(--genki); }
+    .mood.futsu{ background: var(--futsu); }
+    .mood.shindoi{ background: var(--shindoi); }
+    .mood.kyusoku{ background: var(--kyusoku); }
+
+    .panel{
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px;
+      margin-top: 14px;
+    }
+    .panel h2{
+      margin: 0 0 10px;
+      font-size: 18px;
+    }
+    .menuText{
+      font-size: 18px;
+      font-weight: 800;
+      line-height: 1.35;
+      padding: 12px 12px;
+      border-radius: 16px;
+      background: #f9fafb;
+    }
+    .row{
+      display:flex;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .field{
+      flex:1;
+      background:#f9fafb;
+      border-radius: 16px;
+      padding: 12px;
+    }
+    .field label{
+      display:block;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 6px;
+      font-weight: 700;
+      letter-spacing:.02em;
+    }
+    input{
+      width:100%;
+      border:0;
+      background:transparent;
+      font-size: 18px;
+      font-weight: 800;
+      outline:none;
+    }
+    .btn{
+      width:100%;
+      margin-top: 14px;
+      border:0;
+      border-radius: 18px;
+      padding: 16px 14px;
+      font-size: 18px;
+      font-weight: 900;
+      cursor:pointer;
+      box-shadow: var(--shadow);
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color:#111;
+      transition: transform .08s ease, filter .2s ease;
+      user-select:none;
+    }
+    .btn:active{ transform: scale(.99); filter: brightness(.98); }
+    .subBtns{
+      display:flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .btn2{
+      flex:1;
+      border:0;
+      border-radius: 16px;
+      padding: 12px 12px;
+      font-weight: 900;
+      cursor:pointer;
+      box-shadow: var(--shadow);
+      background:#fff;
+    }
+    .btnDanger{
+      background:#fff;
+      color:#b91c1c;
+      border:2px solid #fecaca;
+    }
+    .hint{
+      margin-top: 10px;
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    /* Celebration */
+    .center{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:flex-start;
+      text-align:center;
+      padding-top: 22px;
+    }
+    .flame{
+      width: 92px;
+      height: 92px;
+      border-radius: 26px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background: radial-gradient(circle at 30% 30%, #ffd6a5, #ff8a00 55%, #ff3d00);
+      box-shadow: 0 18px 34px rgba(255,122,24,.25);
+      animation: pop .45s ease both;
+      margin-top: 8px;
+    }
+    .flame span{ font-size: 44px; }
+    .streakNum{
+      font-size: 82px;
+      font-weight: 1000;
+      margin: 10px 0 2px;
+      animation: pop .45s ease .05s both;
+    }
+    .streakLabel{
+      font-size: 22px;
+      font-weight: 900;
+      color: #ff7a18;
+      margin: 0 0 16px;
+      animation: fadeUp .45s ease .1s both;
+    }
+    .weekbar{
+      display:flex;
+      gap: 8px;
+      padding: 12px 14px;
+      border-radius: 18px;
+      background:#fff;
+      box-shadow: var(--shadow);
+      align-items:center;
+      justify-content:center;
+      animation: fadeUp .45s ease .15s both;
+    }
+    .day{
+      width: 36px;
+      height: 46px;
+      border-radius: 14px;
+      background: #f3f4f6;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      font-weight: 900;
+      font-size: 12px;
+      color: #6b7280;
+      position:relative;
+      overflow:hidden;
+    }
+    .day .tick{
+      font-size: 16px;
+      margin-top: 2px;
+      opacity:.18;
+    }
+    .day.done{
+      background: linear-gradient(135deg, #ff7a18, #ffb703);
+      color:#111;
+    }
+    .day.done .tick{ opacity:1; }
+
+    @keyframes pop{
+      from{ transform: translateY(10px) scale(.92); opacity:0; }
+      to{ transform: translateY(0) scale(1); opacity:1; }
+    }
+    @keyframes fadeUp{
+      from{ transform: translateY(10px); opacity:0; }
+      to{ transform: translateY(0); opacity:1; }
+    }
+
+    /* History */
+    .list{
+      display:flex;
+      flex-direction:column;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .item{
+      background:#fff;
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      padding: 12px 12px;
+      display:flex;
+      gap: 10px;
+      align-items:flex-start;
+      justify-content:space-between;
+    }
+    .item .meta{
+      font-weight: 900;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+    .item .sub{
+      font-size: 13px;
+      color: var(--muted);
+      line-height:1.35;
+      white-space: pre-wrap;
+    }
+    .trash{
+      border:0;
+      background:#f3f4f6;
+      border-radius: 14px;
+      width: 44px;
+      height: 44px;
+      cursor:pointer;
+      font-size: 18px;
+      font-weight: 900;
+    }
+
+    /* Bottom nav */
+    .nav{
+      position: fixed;
+      left:0; right:0; bottom:0;
+      background: rgba(255,255,255,.9);
+      backdrop-filter: blur(10px);
+      border-top: 1px solid rgba(0,0,0,.06);
+      padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
+      display:flex;
+      justify-content:center;
+      gap: 10px;
+    }
+    .nav button{
+      flex:1;
+      max-width: 240px;
+      border:0;
+      border-radius: 18px;
+      padding: 12px 10px;
+      font-weight: 1000;
+      background:#fff;
+      box-shadow: var(--shadow);
+      cursor:pointer;
+    }
+    .nav button.active{
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+    }
+
+    .hidden{ display:none; }
+    .smallTitle{
+      text-align:center;
+      font-size: 14px;
+      color: var(--muted);
+      margin-top: 2px;
+      font-weight: 800;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <!-- HOME -->
+    <section id="viewHome">
+      <h1>今日の体調は？</h1>
+
+      <div class="grid">
+        <button class="mood genki" data-mood="genki">💪 元気</button>
+        <button class="mood futsu" data-mood="futsu">🙂 ふつう</button>
+        <button class="mood shindoi" data-mood="shindoi">🥴 しんどい</button>
+        <button class="mood kyusoku" data-mood="kyusoku">🛏️ 休息</button>
+      </div>
+
+      <div class="panel">
+        <h2>今日のメニュー</h2>
+        <div id="menuBox" class="menuText">まず体調を選んでね</div>
+
+        <div class="row">
+          <div class="field">
+            <label>今日の歩数（任意）</label>
+            <input id="stepsInput" inputmode="numeric" placeholder="例：8000" />
+          </div>
+          <div class="field">
+            <label>運動（分）（任意）</label>
+            <input id="minsInput" inputmode="numeric" placeholder="例：15" />
+          </div>
+        </div>
+
+        <button id="doneBtn" class="btn" disabled>やった！</button>
+
+        <div class="hint">
+          ※ 休息（休む）でもOK。触ることが大事なので「その日に1回でも“やった！”を押す」＝連続カウントします。
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>今日の記録（プレビュー）</h2>
+        <div id="preview" class="menuText">-</div>
+      </div>
+    </section>
+
+    <!-- CELEBRATION -->
+    <section id="viewCelebrate" class="hidden center">
+      <div class="flame"><span>🔥</span></div>
+      <div id="streakNum" class="streakNum">0</div>
+      <div class="streakLabel">日連続</div>
+
+      <div id="weekbar" class="weekbar"></div>
+
+      <div style="width:100%; max-width:520px; margin-top:16px;">
+        <button id="nextBtn" class="btn">次へ</button>
+        <div class="subBtns">
+          <button id="toHistoryBtn" class="btn2">履歴へ</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- HISTORY -->
+    <section id="viewHistory" class="hidden">
+      <h1 style="font-size:34px;margin-bottom:6px;">履歴</h1>
+      <div class="smallTitle">テスト中はここから消せるよ</div>
+
+      <div class="panel">
+        <div class="subBtns">
+          <button id="clearAllBtn" class="btn2 btnDanger">全履歴を消す</button>
+          <button id="exportBtn" class="btn2">コピー（CSV）</button>
+        </div>
+        <div class="hint">※この端末（ブラウザ）内に保存されます。別端末には自動同期しません。</div>
+      </div>
+
+      <div id="historyList" class="list"></div>
+    </section>
+  </div>
+
+  <div class="nav">
+    <button id="navHome" class="active">ホーム</button>
+    <button id="navHistory">履歴</button>
+  </div>
+
+<script>
+(() => {
+  const STORAGE_KEY = "workout_app_logs_v1";
+  const MENU_CACHE_KEY = "workout_app_menu_cache_v1";
+
+  const viewHome = document.getElementById("viewHome");
+  const viewCelebrate = document.getElementById("viewCelebrate");
+  const viewHistory = document.getElementById("viewHistory");
+
+  const navHome = document.getElementById("navHome");
+  const navHistory = document.getElementById("navHistory");
+
+  const menuBox = document.getElementById("menuBox");
+  const preview = document.getElementById("preview");
+  const doneBtn = document.getElementById("doneBtn");
+  const stepsInput = document.getElementById("stepsInput");
+  const minsInput = document.getElementById("minsInput");
+
+  const streakNum = document.getElementById("streakNum");
+  const weekbar = document.getElementById("weekbar");
+  const nextBtn = document.getElementById("nextBtn");
+  const toHistoryBtn = document.getElementById("toHistoryBtn");
+
+  const historyList = document.getElementById("historyList");
+  const clearAllBtn = document.getElementById("clearAllBtn");
+  const exportBtn = document.getElementById("exportBtn");
+
+  const moodLabels = {
+    genki: "元気",
+    futsu: "ふつう",
+    shindoi: "しんどい",
+    kyusoku: "休息"
+  };
+
+  // 固定メニュー（あなたの案）
+  const menus = {
+    genki: ["リングフィット", "Fit Boxing", "HOP!STEP!DANCE!"], // ランダム
+    futsu: ["リングフィット（ウォーキングモード）+ YouTube 1本"],
+    shindoi: ["YouTube ヨガ 1本 + 寝る前ストレッチ 1本"],
+    kyusoku: ["寝る前ストレッチ 5分 / 休む"]
+  };
+
+  let selectedMood = null;
+  let selectedMenu = null;
+
+  function pad(n){ return String(n).padStart(2,"0"); }
+
+  function formatDateLocal(d = new Date()){
+    const y = d.getFullYear();
+    const m = pad(d.getMonth()+1);
+    const day = pad(d.getDate());
+    return `${y}-${m}-${day}`;
+  }
+
+  function loadLogs(){
+    try{
+      return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+    }catch{
+      return [];
+    }
+  }
+  function saveLogs(logs){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(logs));
+  }
+
+  function loadMenuCache(){
+    try{
+      return JSON.parse(localStorage.getItem(MENU_CACHE_KEY) || "{}");
+    }catch{
+      return {};
+    }
+  }
+  function saveMenuCache(cache){
+    localStorage.setItem(MENU_CACHE_KEY, JSON.stringify(cache));
+  }
+
+  // 元気メニュー：当日は固定（再抽選しない）
+  function getGenkiMenuForToday(){
+    const today = formatDateLocal();
+    const cache = loadMenuCache();
+    if(cache[today]) return cache[today];
+    const arr = menus.genki;
+    const pick = arr[Math.floor(Math.random()*arr.length)];
+    cache[today] = pick;
+    saveMenuCache(cache);
+    return pick;
+  }
+
+  function getMenuForMood(mood){
+    if(mood === "genki") return getGenkiMenuForToday();
+    return menus[mood][0];
+  }
+
+  function sanitizeNumber(v){
+    if(!v) return "";
+    const s = String(v).replace(/[^\d]/g,"");
+    return s;
+  }
+
+  function updatePreview(){
+    const date = formatDateLocal();
+    const steps = sanitizeNumber(stepsInput.value);
+    const mins = sanitizeNumber(minsInput.value);
+    const mood = selectedMood ? moodLabels[selectedMood] : "-";
+    const menu = selectedMenu ? selectedMenu : "-";
+    preview.textContent = `記録: ${date}, ${mood}\nメニュー: ${menu}\n今日の歩数: ${steps ? steps+"歩" : "未入力"}　運動: ${mins ? mins+"分" : "未入力"}`;
+  }
+
+  function showView(which){
+    viewHome.classList.add("hidden");
+    viewCelebrate.classList.add("hidden");
+    viewHistory.classList.add("hidden");
+
+    navHome.classList.remove("active");
+    navHistory.classList.remove("active");
+
+    if(which === "home"){
+      viewHome.classList.remove("hidden");
+      navHome.classList.add("active");
+      updatePreview();
+    }else if(which === "celebrate"){
+      viewCelebrate.classList.remove("hidden");
+    }else if(which === "history"){
+      viewHistory.classList.remove("hidden");
+      navHistory.classList.add("active");
+      renderHistory();
+    }
+  }
+
+  function uniqueDoneDates(logs){
+    // その日に1回でも“やった”があればOK（休息含む）
+    const set = new Set();
+    for(const l of logs){
+      if(l && l.date) set.add(l.date);
+    }
+    return set;
+  }
+
+  function computeStreak(logs){
+    const datesSet = uniqueDoneDates(logs);
+    let streak = 0;
+
+    const today = new Date();
+    // 今日から遡って連続している日数を数える
+    for(let i=0; i<3650; i++){
+      const d = new Date(today);
+      d.setDate(today.getDate() - i);
+      const key = formatDateLocal(d);
+      if(datesSet.has(key)){
+        streak++;
+      }else{
+        break;
+      }
+    }
+    return streak;
+  }
+
+  function buildWeekBar(logs){
+    weekbar.innerHTML = "";
+    const datesSet = uniqueDoneDates(logs);
+    const labels = ["日","月","火","水","木","金","土"];
+    const base = new Date();
+
+    // 過去6日 + 今日 = 7
+    for(let i=6;i>=0;i--){
+      const d = new Date(base);
+      d.setDate(base.getDate() - i);
+      const key = formatDateLocal(d);
+      const el = document.createElement("div");
+      el.className = "day" + (datesSet.has(key) ? " done" : "");
+      el.innerHTML = `<div>${labels[d.getDay()]}</div><div class="tick">✓</div>`;
+      weekbar.appendChild(el);
+    }
+  }
+
+  function animateStreak(target){
+    streakNum.textContent = "0";
+    const start = 0;
+    const duration = 520; // ms
+    const t0 = performance.now();
+
+    function tick(now){
+      const p = Math.min(1, (now - t0) / duration);
+      const val = Math.round(start + (target - start) * (p*p*(3-2*p))); // easeInOut
+      streakNum.textContent = String(val);
+      if(p < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  function addLog(){
+    const date = formatDateLocal();
+    const steps = sanitizeNumber(stepsInput.value);
+    const mins = sanitizeNumber(minsInput.value);
+
+    const logs = loadLogs();
+    logs.push({
+      id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + "_" + Math.random().toString(16).slice(2),
+      date,
+      mood: selectedMood,
+      moodLabel: moodLabels[selectedMood],
+      menu: selectedMenu,
+      steps: steps ? Number(steps) : null,
+      mins: mins ? Number(mins) : null,
+      createdAt: Date.now()
+    });
+    saveLogs(logs);
+
+    // 演出画面
+    const streak = computeStreak(logs);
+    buildWeekBar(logs);
+    showView("celebrate");
+    animateStreak(streak);
+  }
+
+  function renderHistory(){
+    const logs = loadLogs()
+      .slice()
+      .sort((a,b) => (b.createdAt||0) - (a.createdAt||0));
+
+    historyList.innerHTML = "";
+
+    if(logs.length === 0){
+      const empty = document.createElement("div");
+      empty.className = "panel";
+      empty.innerHTML = `<div class="hint">まだ記録がありません。ホームで「やった！」を押すとここに出ます。</div>`;
+      historyList.appendChild(empty);
+      return;
+    }
+
+    for(const l of logs){
+      const item = document.createElement("div");
+      item.className = "item";
+
+      const left = document.createElement("div");
+      const meta = document.createElement("div");
+      meta.className = "meta";
+      meta.textContent = `${l.date} / ${l.moodLabel}`;
+
+      const sub = document.createElement("div");
+      sub.className = "sub";
+      const steps = (l.steps === null || l.steps === undefined) ? "未入力" : `${l.steps}歩`;
+      const mins = (l.mins === null || l.mins === undefined) ? "未入力" : `${l.mins}分`;
+      sub.textContent = `メニュー: ${l.menu}\n歩数: ${steps} / 運動: ${mins}`;
+
+      left.appendChild(meta);
+      left.appendChild(sub);
+
+      const trash = document.createElement("button");
+      trash.className = "trash";
+      trash.textContent = "🗑️";
+      trash.title = "この記録を削除";
+      trash.addEventListener("click", () => {
+        const ok = confirm("この記録を削除しますか？");
+        if(!ok) return;
+        const after = loadLogs().filter(x => x.id !== l.id);
+        saveLogs(after);
+        renderHistory();
+      });
+
+      item.appendChild(left);
+      item.appendChild(trash);
+      historyList.appendChild(item);
+    }
+  }
+
+  // Mood buttons
+  document.querySelectorAll(".mood").forEach(btn => {
+    btn.addEventListener("click", () => {
+      selectedMood = btn.dataset.mood;
+      selectedMenu = getMenuForMood(selectedMood);
+
+      // 表示更新
+      menuBox.textContent = selectedMenu;
+      doneBtn.disabled = false;
+
+      updatePreview();
+      // iOSで数字入力が重い時があるので、フォーカスは奪わない
+    });
+  });
+
+  stepsInput.addEventListener("input", updatePreview);
+  minsInput.addEventListener("input", updatePreview);
+
+  doneBtn.addEventListener("click", () => {
+    if(!selectedMood || !selectedMenu) return;
+    addLog();
+  });
+
+  nextBtn.addEventListener("click", () => showView("home"));
+  toHistoryBtn.addEventListener("click", () => showView("history"));
+
+  navHome.addEventListener("click", () => showView("home"));
+  navHistory.addEventListener("click", () => showView("history"));
+
+  clearAllBtn.addEventListener("click", () => {
+    const ok = confirm("全履歴を削除しますか？（元に戻せません）");
+    if(!ok) return;
+    localStorage.removeItem(STORAGE_KEY);
+    // 今日の元気メニュー固定は残してもいいけど、テストなら一緒に消す
+    // localStorage.removeItem(MENU_CACHE_KEY);
+    renderHistory();
+    alert("削除しました。");
+  });
+
+  exportBtn.addEventListener("click", async () => {
+    const logs = loadLogs().slice().sort((a,b)=>(a.createdAt||0)-(b.createdAt||0));
+    const header = ["date","mood","menu","steps","mins","createdAt"];
+    const lines = [header.join(",")];
+    for(const l of logs){
+      const row = [
+        l.date,
+        l.moodLabel,
+        String(l.menu||"").replaceAll(","," "),
+        l.steps ?? "",
+        l.mins ?? "",
+        l.createdAt ?? ""
+      ];
+      lines.push(row.join(","));
+    }
+    const csv = lines.join("\n");
+    try{
+      await navigator.clipboard.writeText(csv);
+      alert("CSVをコピーしました（メモ等に貼り付けできます）");
+    }catch{
+      // Clipboardが使えない場合
+      prompt("下をコピーしてください", csv);
+    }
+  });
+
+  // 初期化
+  showView("home");
+  updatePreview();
+})();
+</script>
+</body>
+</html>

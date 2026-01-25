@@ -1,0 +1,860 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Workout App</title>
+
+  <style>
+    /* =========
+      0) ベース
+    ========= */
+    :root{
+      --bg1:#eaf3ff;
+      --bg2:#f6efff;
+      --bg3:#fff7ea;
+
+      --glass: rgba(255,255,255,.72);
+      --glass2: rgba(255,255,255,.58);
+      --stroke: rgba(120,140,200,.22);
+
+      --shadow: 0 18px 40px rgba(40,60,120,.18);
+      --shadowSoft: 0 10px 22px rgba(40,60,120,.12);
+
+      --text: rgba(10,15,30,.88);
+      --muted: rgba(30,40,70,.62);
+      --muted2: rgba(30,40,70,.45);
+
+      --blue: rgba(40,95,255,.95);
+      --pad: 14px;
+
+      --tabH: 58px;
+      --navH: 76px;
+    }
+
+    html, body { height: 100%; }
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, "Hiragino Sans", "Noto Sans JP", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(1200px 700px at 25% -10%, #ffffff 0%, transparent 55%),
+        radial-gradient(900px 600px at 80% 0%, #ffffff 0%, transparent 55%),
+        linear-gradient(180deg, var(--bg1) 0%, var(--bg2) 55%, var(--bg3) 100%);
+      overflow-x:hidden;
+    }
+
+    /* キラ粒 */
+    body::before{
+      content:"";
+      position: fixed;
+      inset: 0;
+      pointer-events:none;
+      background:
+        radial-gradient(circle at 10% 20%, rgba(255,255,255,.9) 0 2px, transparent 3px),
+        radial-gradient(circle at 30% 40%, rgba(255,255,255,.85) 0 1.5px, transparent 3px),
+        radial-gradient(circle at 70% 25%, rgba(255,255,255,.9) 0 2px, transparent 3px),
+        radial-gradient(circle at 85% 55%, rgba(255,255,255,.8) 0 1.5px, transparent 3px),
+        radial-gradient(circle at 20% 75%, rgba(255,255,255,.8) 0 2px, transparent 4px),
+        radial-gradient(circle at 60% 80%, rgba(255,255,255,.85) 0 2px, transparent 4px);
+      opacity:.55;
+      filter: blur(.2px);
+      animation: twinkle 6s ease-in-out infinite alternate;
+    }
+
+    /* ふわ光 */
+    body::after{
+      content:"";
+      position: fixed;
+      inset: -30%;
+      pointer-events:none;
+      background:
+        radial-gradient(closest-side at 35% 25%, rgba(255,255,255,.35), transparent 65%),
+        radial-gradient(closest-side at 70% 60%, rgba(255,255,255,.22), transparent 70%);
+      transform: translate3d(0,0,0);
+      animation: drift 10s ease-in-out infinite alternate;
+      opacity:.9;
+    }
+
+    @keyframes twinkle{
+      0%{ opacity:.35; transform: translateY(0px); }
+      100%{ opacity:.62; transform: translateY(-8px); }
+    }
+    @keyframes drift{
+      0%{ transform: translate(-2%, -1%); }
+      100%{ transform: translate(2%, 1%); }
+    }
+
+    .wrap{
+      max-width: 520px;
+      margin: 0 auto;
+      padding: calc(var(--pad) + env(safe-area-inset-top)) var(--pad) calc(var(--navH) + 24px + env(safe-area-inset-bottom));
+    }
+
+    h1{
+      text-align:center;
+      font-size: 34px;
+      letter-spacing: .02em;
+      margin: 18px 0 12px;
+      font-weight: 900;
+    }
+
+    .card{
+      background: var(--glass);
+      border: 1px solid var(--stroke);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-radius: 26px;
+    }
+
+    /* =========
+      1) タブ（体調）
+    ========= */
+    .mood-tabs{
+      display:flex;
+      gap: 12px;
+      justify-content:space-between;
+      padding: 8px 4px 2px;
+    }
+    .mood-btn{
+      flex:1;
+      height: var(--tabH);
+      border-radius: 18px;
+      border: 1px solid rgba(120,140,200,.18);
+      background: rgba(255,255,255,.78);
+      box-shadow: 0 10px 18px rgba(40,60,120,.10);
+      position: relative;
+      overflow:hidden;
+      -webkit-tap-highlight-color: transparent;
+
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap: 8px;
+      font-weight: 900;
+      font-size: 18px;
+      color: rgba(30,40,70,.78);
+      padding: 0 8px;
+      white-space: nowrap;
+    }
+    .mood-btn::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background: linear-gradient(180deg, rgba(255,255,255,.72) 0%, rgba(255,255,255,0) 55%);
+      opacity:.9;
+      pointer-events:none;
+    }
+    .mood-btn[data-active="true"]{
+      border-color: rgba(255,255,255,.55);
+      box-shadow: 0 14px 26px rgba(40,60,120,.18);
+      color:#fff;
+    }
+    .mood-btn[data-mood="genki"][data-active="true"]{
+      background: linear-gradient(180deg, #ffda69, #ffb300);
+    }
+    .mood-btn[data-mood="futsu"][data-active="true"]{
+      background: linear-gradient(180deg, #8ee9df, #49cfc4);
+    }
+    .mood-btn[data-mood="shindoi"][data-active="true"]{
+      background: linear-gradient(180deg, #b8b2ff, #8c86ff);
+    }
+    .mood-btn[data-mood="rest"][data-active="true"]{
+      background: linear-gradient(180deg, #b9b9ff, #8f8fff);
+    }
+
+    /* =========
+      2) メインカード
+    ========= */
+    .hero{
+      margin-top: 12px;
+      padding: 14px;
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+      padding: 10px 12px;
+      border-radius: 16px;
+      font-weight: 900;
+      font-size: 16px;
+      color: rgba(30,40,70,.70);
+      background: rgba(255,255,255,.60);
+      border: 1px solid rgba(120,140,200,.18);
+      box-shadow: 0 10px 18px rgba(40,60,120,.08);
+      margin-bottom: 10px;
+    }
+
+    .title{
+      font-size: 38px;
+      font-weight: 950;
+      margin: 4px 0 12px;
+      letter-spacing: .01em;
+    }
+
+    .banner-wrap{
+      background: rgba(255,255,255,.55);
+      border: 1px solid rgba(120,140,200,.20);
+      border-radius: 18px;
+      padding: 12px;
+    }
+    .banner-img{
+      width:100%;
+      height:auto;
+      display:block;
+      border-radius: 14px;
+    }
+
+    .inputs{
+      display:flex;
+      gap:12px;
+      margin-top: 14px;
+    }
+    .input-card{
+      flex:1;
+      background: rgba(255,255,255,.70);
+      border: 1px solid rgba(120,140,200,.20);
+      border-radius: 18px;
+      padding: 12px 12px 10px;
+      box-shadow: var(--shadowSoft);
+    }
+    .input-card .label{
+      font-weight: 900;
+      color: var(--muted);
+      display:flex;
+      align-items:center;
+      gap:8px;
+      font-size: 16px;
+    }
+    .input-card input{
+      margin-top: 10px;
+      width:100%;
+      font-size: 40px;
+      font-weight: 950;
+      border: none;
+      outline: none;
+      background: transparent;
+      text-align: center;
+      color: rgba(10,15,30,.86);
+    }
+    .unit{
+      text-align:right;
+      font-weight: 900;
+      color: var(--muted2);
+      margin-top: -10px;
+      font-size: 18px;
+    }
+
+    .btn-row{
+      display:flex;
+      gap:12px;
+      margin-top: 14px;
+    }
+    .btn{
+      flex:1;
+      border:none;
+      border-radius: 18px;
+      padding: 16px 12px;
+      font-size: 22px;
+      font-weight: 950;
+      color:#fff;
+      box-shadow: 0 16px 30px rgba(40,60,120,.22);
+      position:relative;
+      overflow:hidden;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background: linear-gradient(180deg, rgba(255,255,255,.35), rgba(255,255,255,0) 55%);
+      pointer-events:none;
+    }
+    .btn-primary{
+      background: linear-gradient(180deg, #ffd46a, #ffb100);
+    }
+    .btn-secondary{
+      background: linear-gradient(180deg, #9fc7ff, #4b82ff);
+    }
+
+    .status{
+      margin-top: 10px;
+      text-align:center;
+      font-weight: 900;
+      color: rgba(30,40,70,.62);
+    }
+
+    /* =========
+      3) 履歴ページ
+    ========= */
+    .page{ display:none; }
+    .page.active{ display:block; }
+
+    .hist-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      margin: 8px 0 12px;
+    }
+    .hist-head h2{
+      margin:0;
+      font-size: 26px;
+      font-weight: 950;
+    }
+    .mini-btn{
+      border:none;
+      border-radius: 14px;
+      padding: 10px 12px;
+      font-weight: 950;
+      background: rgba(255,255,255,.74);
+      border: 1px solid rgba(120,140,200,.20);
+      box-shadow: 0 10px 18px rgba(40,60,120,.08);
+      color: rgba(30,40,70,.78);
+      -webkit-tap-highlight-color: transparent;
+      white-space: nowrap;
+    }
+
+    .hist-list{
+      display:flex;
+      flex-direction:column;
+      gap: 10px;
+    }
+    .hist-item{
+      padding: 12px 12px;
+      border-radius: 18px;
+      background: rgba(255,255,255,.70);
+      border: 1px solid rgba(120,140,200,.18);
+      box-shadow: 0 10px 18px rgba(40,60,120,.08);
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap: 12px;
+    }
+    .hist-item .left{
+      display:flex;
+      flex-direction:column;
+      gap: 4px;
+      min-width: 0;
+    }
+    .hist-item .date{
+      font-weight: 950;
+      color: rgba(20,30,60,.84);
+      font-size: 16px;
+    }
+    .hist-item .meta{
+      color: rgba(30,40,70,.62);
+      font-weight: 900;
+      font-size: 14px;
+    }
+    .del{
+      border:none;
+      background: rgba(255,255,255,.85);
+      border: 1px solid rgba(200,120,120,.25);
+      color: rgba(180,60,60,.95);
+      border-radius: 14px;
+      padding: 10px 12px;
+      font-weight: 950;
+      -webkit-tap-highlight-color: transparent;
+      white-space: nowrap;
+    }
+
+    .empty{
+      padding: 16px;
+      border-radius: 18px;
+      text-align:center;
+      font-weight: 900;
+      color: rgba(30,40,70,.55);
+      background: rgba(255,255,255,.55);
+      border: 1px solid rgba(120,140,200,.18);
+      box-shadow: 0 10px 18px rgba(40,60,120,.08);
+    }
+
+    /* =========
+      4) 下部ナビ（固定）
+    ========= */
+    .bottom-nav{
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      padding: 0 var(--pad) calc(10px + env(safe-area-inset-bottom));
+      z-index: 10;
+    }
+    .bottom-nav .bar{
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 10px 14px;
+      border-radius: 22px;
+      background: rgba(255,255,255,.75);
+      border: 1px solid rgba(120,140,200,.18);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      box-shadow: var(--shadowSoft);
+    }
+    .nav-item{
+      flex:1;
+      text-align:center;
+      font-weight: 950;
+      color: rgba(40,55,120,.55);
+      display:flex;
+      flex-direction:column;
+      gap: 6px;
+      align-items:center;
+      justify-content:center;
+      -webkit-tap-highlight-color: transparent;
+      padding: 8px 0;
+      border-radius: 18px;
+      user-select:none;
+    }
+    .nav-item .ico{
+      font-size: 22px;
+      line-height: 1;
+    }
+    .nav-item.active{
+      color: var(--blue);
+      background: rgba(90,130,255,.12);
+    }
+
+    /* スマホで“いかにもアプリ”感 */
+    .tap{
+      transform: translateY(0);
+      transition: transform .06s ease;
+    }
+    .tap:active{ transform: translateY(1px); }
+
+    /* 小さな補助 */
+    .sr{ position:absolute; left:-9999px; }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <!-- HOME -->
+    <div id="page-home" class="page active">
+      <h1>今日の体調は？</h1>
+
+      <div class="mood-tabs">
+        <button class="mood-btn tap" data-mood="genki"   id="btn-genki">☀️ 元気</button>
+        <button class="mood-btn tap" data-mood="futsu"   id="btn-futsu">🩵 ふつう</button>
+        <button class="mood-btn tap" data-mood="shindoi" id="btn-shindoi">🙂 しんどい</button>
+        <button class="mood-btn tap" data-mood="rest"    id="btn-rest">🐾 休息</button>
+      </div>
+
+      <section class="card hero">
+        <div class="pill" id="pill-mood">🐾 休息</div>
+        <div class="title" id="title-workout">Rest</div>
+
+        <div class="banner-wrap">
+          <img class="banner-img" id="banner" src="assets/rest.png" alt="banner">
+        </div>
+
+        <div class="inputs">
+          <div class="input-card">
+            <div class="label">👟 今日の歩数（空欄NG）</div>
+            <input type="number" id="steps" inputmode="numeric" value="0" min="0" required />
+            <div class="unit">歩</div>
+          </div>
+          <div class="input-card">
+            <div class="label">🕒 運動（空欄NG）</div>
+            <input type="number" id="minutes" inputmode="numeric" value="0" min="0" required />
+            <div class="unit">分</div>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-primary tap" id="btn-done">✓ やった！</button>
+          <button class="btn btn-secondary tap" id="btn-more">＋ もう1つやる</button>
+        </div>
+
+        <div class="status" id="status">記録：—</div>
+      </section>
+    </div>
+
+    <!-- HISTORY -->
+    <div id="page-history" class="page">
+      <div class="hist-head">
+        <h2>履歴</h2>
+        <div style="display:flex; gap:10px;">
+          <button class="mini-btn tap" id="btn-export">Excel出力（CSV）</button>
+          <button class="mini-btn tap" id="btn-clear" title="全削除">全削除</button>
+        </div>
+      </div>
+
+      <div class="hist-list" id="hist-list"></div>
+      <div class="empty" id="hist-empty" style="display:none;">まだ記録がありません</div>
+    </div>
+  </div>
+
+  <!-- Bottom Nav -->
+  <div class="bottom-nav">
+    <div class="bar">
+      <div class="nav-item active tap" id="nav-home">
+        <div class="ico">🏠</div>
+        <div>ホーム</div>
+      </div>
+      <div class="nav-item tap" id="nav-history">
+        <div class="ico">🕘</div>
+        <div>履歴</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* =========
+      データ定義
+    ========= */
+    const MOODS = {
+      genki:   { label:"☀️ 元気",  pill:"☀️ 元気",  activeBtn:"btn-genki" },
+      futsu:   { label:"🩵 ふつう", pill:"🩵 ふつう", activeBtn:"btn-futsu" },
+      shindoi: { label:"🙂 しんどい", pill:"🙂 しんどい", activeBtn:"btn-shindoi" },
+      rest:    { label:"🐾 休息",  pill:"🐾 休息",  activeBtn:"btn-rest" }
+    };
+
+    // メニュー（表示名 / 画像）
+    // 元気: 3つからランダム
+    const WORKOUTS = {
+      genki: [
+        { name:"Fit Boxing",        img:"assets/fitboxing.png" },
+        { name:"Ring Fit",          img:"assets/ringfit.png" },
+        { name:"HOP!STEP!DANCE!",   img:"assets/hopstepdance.png" }
+      ],
+      futsu: [
+        { name:"Ring Fit（ウォーキングモード）", img:"assets/ringfit.png" } // 表示はこのままでもOK
+      ],
+      shindoi: [
+        { name:"Yoga",     img:"assets/yoga.png" },
+        { name:"Stretch",  img:"assets/yoga.png" } // ストレッチは英語でOK：画像は仮でyoga
+      ],
+      rest: [
+        { name:"Rest", img:"assets/rest.png" }
+      ]
+    };
+
+    /* =========
+      状態
+    ========= */
+    const LS_KEY = "workout_app_v1";
+    const todayStr = () => {
+      const d = new Date();
+      const y = d.getFullYear();
+      const m = String(d.getMonth()+1).padStart(2,"0");
+      const day = String(d.getDate()).padStart(2,"0");
+      return `${y}-${m}-${day}`;
+    };
+
+    // localStorage構造
+    // {
+    //   logs: [{id, date, mood, workoutName, steps, minutes, ts}],
+    //   lastHome: { mood, workoutName, workoutImg } // その日の表示(再抽選なし)
+    // }
+    const loadState = () => {
+      try{
+        const raw = localStorage.getItem(LS_KEY);
+        if(!raw) return { logs: [], lastHome: null };
+        const parsed = JSON.parse(raw);
+        if(!parsed.logs) parsed.logs = [];
+        return parsed;
+      }catch{
+        return { logs: [], lastHome: null };
+      }
+    };
+    const saveState = (s) => localStorage.setItem(LS_KEY, JSON.stringify(s));
+
+    let state = loadState();
+    let currentMood = "rest";
+    let currentWorkout = { name:"Rest", img:"assets/rest.png" };
+
+    /* =========
+      要素
+    ========= */
+    const $ = (id)=>document.getElementById(id);
+
+    const pageHome = $("page-home");
+    const pageHistory = $("page-history");
+
+    const pillMood = $("pill-mood");
+    const titleWorkout = $("title-workout");
+    const banner = $("banner");
+
+    const stepsInput = $("steps");
+    const minutesInput = $("minutes");
+
+    const status = $("status");
+
+    const btnDone = $("btn-done");
+    const btnMore = $("btn-more");
+
+    const navHome = $("nav-home");
+    const navHistory = $("nav-history");
+
+    const histList = $("hist-list");
+    const histEmpty = $("hist-empty");
+    const btnExport = $("btn-export");
+    const btnClear = $("btn-clear");
+
+    /* =========
+      UI helpers
+    ========= */
+    function setActiveMoodButton(mood){
+      // 全部false
+      ["genki","futsu","shindoi","rest"].forEach(m=>{
+        const el = document.querySelector(`.mood-btn[data-mood="${m}"]`);
+        if(el) el.dataset.active = "false";
+      });
+      const el = document.querySelector(`.mood-btn[data-mood="${mood}"]`);
+      if(el) el.dataset.active = "true";
+    }
+
+    function pickWorkoutForMood(mood, forceNew=false){
+      const date = todayStr();
+
+      // 「再抽選いらない」＝その日一度選んだものを保持
+      if(!forceNew && state.lastHome && state.lastHome.date === date && state.lastHome.mood === mood){
+        return { name: state.lastHome.workoutName, img: state.lastHome.workoutImg };
+      }
+
+      let chosen;
+      if(mood === "genki"){
+        const arr = WORKOUTS.genki;
+        chosen = arr[Math.floor(Math.random() * arr.length)];
+      } else if(mood === "shindoi"){
+        // しんどいは固定でYogaでもいいけど、ここは「Yoga」優先
+        chosen = WORKOUTS.shindoi[0];
+      } else {
+        chosen = WORKOUTS[mood][0];
+      }
+
+      state.lastHome = { date, mood, workoutName: chosen.name, workoutImg: chosen.img };
+      saveState(state);
+      return chosen;
+    }
+
+    function renderHome(){
+      const moodInfo = MOODS[currentMood];
+      pillMood.textContent = moodInfo.pill;
+
+      titleWorkout.textContent = currentWorkout.name;
+      banner.src = currentWorkout.img;
+
+      setActiveMoodButton(currentMood);
+
+      status.textContent = `記録：${todayStr()}、${moodInfo.label.replace("☀️ ","").replace("🩵 ","").replace("🙂 ","").replace("🐾 ","")}`;
+    }
+
+    function isValidNumberField(inputEl){
+      // 空欄NG（0でもOK）
+      return inputEl.value !== "" && !Number.isNaN(Number(inputEl.value));
+    }
+
+    /* =========
+      ログ
+    ========= */
+    function addLog(){
+      if(!isValidNumberField(stepsInput) || !isValidNumberField(minutesInput)){
+        alert("歩数と運動分は空欄にできません。0でも入力してください。");
+        return;
+      }
+
+      const steps = Number(stepsInput.value);
+      const minutes = Number(minutesInput.value);
+
+      const log = {
+        id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + "_" + Math.random().toString(16).slice(2),
+        date: todayStr(),
+        mood: currentMood,
+        workoutName: currentWorkout.name,
+        steps,
+        minutes,
+        ts: Date.now()
+      };
+
+      state.logs.unshift(log);
+      saveState(state);
+
+      // 入力は残してOK（好み次第）。今回は触りやすさ優先で残す。
+      alert("記録しました！");
+    }
+
+    function deleteLog(id){
+      state.logs = state.logs.filter(x=>x.id !== id);
+      saveState(state);
+      renderHistory();
+    }
+
+    function clearLogs(){
+      if(!confirm("履歴を全削除します。よろしいですか？")) return;
+      state.logs = [];
+      saveState(state);
+      renderHistory();
+    }
+
+    function renderHistory(){
+      histList.innerHTML = "";
+      const logs = state.logs;
+
+      if(!logs.length){
+        histEmpty.style.display = "block";
+        return;
+      }
+      histEmpty.style.display = "none";
+
+      for(const l of logs){
+        const moodLabel = MOODS[l.mood]?.label ?? l.mood;
+
+        const item = document.createElement("div");
+        item.className = "hist-item card";
+        item.style.background = "rgba(255,255,255,.70)";
+        item.style.boxShadow = "var(--shadowSoft)";
+        item.style.borderRadius = "18px";
+        item.style.border = "1px solid rgba(120,140,200,.18)";
+
+        const left = document.createElement("div");
+        left.className = "left";
+
+        const d = document.createElement("div");
+        d.className = "date";
+        d.textContent = l.date;
+
+        const meta = document.createElement("div");
+        meta.className = "meta";
+        meta.textContent = `${moodLabel} / ${l.workoutName} / ${l.steps}歩 / ${l.minutes}分`;
+
+        left.appendChild(d);
+        left.appendChild(meta);
+
+        const del = document.createElement("button");
+        del.className = "del tap";
+        del.textContent = "削除";
+        del.addEventListener("click", ()=>deleteLog(l.id));
+
+        item.appendChild(left);
+        item.appendChild(del);
+        histList.appendChild(item);
+      }
+    }
+
+    /* =========
+      CSV（Excelで開ける）
+    ========= */
+    function exportCSV(){
+      const rows = [
+        ["date","mood","workout","steps","minutes","timestamp"]
+      ];
+
+      for(const l of state.logs.slice().reverse()){
+        rows.push([
+          l.date,
+          MOODS[l.mood]?.label ?? l.mood,
+          l.workoutName,
+          String(l.steps),
+          String(l.minutes),
+          String(l.ts)
+        ]);
+      }
+
+      const csv = rows.map(r => r.map(cell=>{
+        const s = String(cell);
+        // CSV安全化
+        if(/[",\n]/.test(s)) return `"${s.replace(/"/g,'""')}"`;
+        return s;
+      }).join(",")).join("\n");
+
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `workout_logs_${todayStr()}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    /* =========
+      ページ切替
+    ========= */
+    function showPage(which){
+      if(which === "home"){
+        pageHome.classList.add("active");
+        pageHistory.classList.remove("active");
+        navHome.classList.add("active");
+        navHistory.classList.remove("active");
+      } else {
+        pageHome.classList.remove("active");
+        pageHistory.classList.add("active");
+        navHome.classList.remove("active");
+        navHistory.classList.add("active");
+        renderHistory();
+      }
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    /* =========
+      イベント
+    ========= */
+    function onMoodSelect(mood){
+      currentMood = mood;
+      currentWorkout = pickWorkoutForMood(mood, false);
+      renderHome();
+    }
+
+    $("btn-genki").addEventListener("click", ()=>onMoodSelect("genki"));
+    $("btn-futsu").addEventListener("click", ()=>onMoodSelect("futsu"));
+    $("btn-shindoi").addEventListener("click", ()=>onMoodSelect("shindoi"));
+    $("btn-rest").addEventListener("click", ()=>onMoodSelect("rest"));
+
+    btnDone.addEventListener("click", ()=>{
+      addLog();
+    });
+
+    btnMore.addEventListener("click", ()=>{
+      // 「もう1つやる」＝気分はそのまま、元気のみランダム再抽選、それ以外は同じ
+      if(currentMood === "genki"){
+        currentWorkout = pickWorkoutForMood("genki", true); // forceNew
+        renderHome();
+      } else {
+        alert("この体調ではメニューは固定です（元気の時だけ変わります）。");
+      }
+    });
+
+    navHome.addEventListener("click", ()=>showPage("home"));
+    navHistory.addEventListener("click", ()=>showPage("history"));
+
+    btnExport.addEventListener("click", exportCSV);
+    btnClear.addEventListener("click", clearLogs);
+
+    // 空欄にされたら0に戻す（空欄NGの保険）
+    function normalizeEmptyToZero(el){
+      el.addEventListener("blur", ()=>{
+        if(el.value === "") el.value = "0";
+      });
+    }
+    normalizeEmptyToZero(stepsInput);
+    normalizeEmptyToZero(minutesInput);
+
+    /* =========
+      起動時
+    ========= */
+    (function init(){
+      // その日最後に見てたムードを優先（なければ休息）
+      const date = todayStr();
+      if(state.lastHome && state.lastHome.date === date){
+        currentMood = state.lastHome.mood;
+        currentWorkout = { name: state.lastHome.workoutName, img: state.lastHome.workoutImg };
+      } else {
+        currentMood = "rest";
+        currentWorkout = pickWorkoutForMood("rest", false);
+      }
+      renderHome();
+      showPage("home");
+    })();
+  </script>
+</body>
+</html>

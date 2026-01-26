@@ -4,12 +4,347 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Workout App</title>
-  <link rel="stylesheet" href="styles.css" />
+
+  <style>
+    :root{
+      /* 全体を小さめ（スクロール無し寄せ） */
+      --scale: 0.94;
+
+      --card-radius: 26px;
+      --soft-radius: 18px;
+
+      --padX: calc(18px * var(--scale));
+      --padY: calc(14px * var(--scale));
+
+      --text: #1f2430;
+      --muted: rgba(31,36,48,.55);
+
+      --glass: rgba(255,255,255,.50);
+      --glass2: rgba(255,255,255,.38);
+
+      --shadow: 0 18px 40px rgba(0,0,0,.12);
+      --stroke: rgba(255,255,255,.55);
+
+      --banner-h: calc(112px * var(--scale)); /* バナー高さ */
+      --btn-h: calc(54px * var(--scale));
+    }
+
+    body{
+      margin: 0;
+      font-family: system-ui, -apple-system, "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+      color: var(--text);
+
+      min-height: 100svh;
+      background: url("assets/background.png") center top / cover no-repeat fixed;
+
+      padding:
+        env(safe-area-inset-top)
+        env(safe-area-inset-right)
+        env(safe-area-inset-bottom)
+        env(safe-area-inset-left);
+    }
+
+    .app{
+      max-width: 430px;
+      margin: 0 auto;
+      padding: calc(14px * var(--scale)) var(--padX) calc(16px * var(--scale));
+    }
+
+    .header{
+      text-align: center;
+      padding: calc(10px * var(--scale)) 0 calc(10px * var(--scale));
+    }
+
+    .title{
+      margin: 0 0 calc(12px * var(--scale));
+      font-size: clamp(28px, 5.3vw, 36px);
+      font-weight: 900;
+      letter-spacing: .02em;
+      text-shadow: 0 2px 14px rgba(255,255,255,.8);
+    }
+
+    .mood-tabs{
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: calc(10px * var(--scale));
+    }
+
+    .tab{
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,.62);
+      border-radius: 18px;
+      padding: calc(10px * var(--scale)) calc(8px * var(--scale));
+      box-shadow: 0 10px 22px rgba(0,0,0,.07);
+      font-weight: 800;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      cursor: pointer;
+      transition: transform .08s ease;
+    }
+    .tab:active{ transform: scale(.98); }
+    .tab.is-active{
+      background: rgba(255,255,255,.78);
+      box-shadow: 0 14px 26px rgba(0,0,0,.10);
+    }
+
+    .card{
+      margin-top: calc(10px * var(--scale));
+      background: var(--glass);
+      border: 1px solid var(--stroke);
+      border-radius: var(--card-radius);
+      box-shadow: var(--shadow);
+      padding: calc(14px * var(--scale));
+      backdrop-filter: blur(12px);
+    }
+
+    .badge{
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: calc(8px * var(--scale)) calc(12px * var(--scale));
+      border-radius: 999px;
+      background: rgba(255,255,255,.70);
+      border: 1px solid rgba(255,255,255,.75);
+      font-weight: 900;
+      box-shadow: 0 10px 20px rgba(0,0,0,.06);
+    }
+
+    .card-head{
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: calc(10px * var(--scale));
+    }
+
+    .workout-title{
+      margin: calc(6px * var(--scale)) 0 0;
+      font-size: clamp(30px, 7vw, 44px);
+      line-height: 1.02;
+      font-weight: 950;
+      letter-spacing: .01em;
+    }
+
+    /* 継続表示（炎アニメ） */
+    .streak{
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.55);
+      border: 1px solid rgba(255,255,255,.72);
+      box-shadow: 0 10px 22px rgba(0,0,0,.06);
+      font-weight: 900;
+      white-space: nowrap;
+    }
+    .flame{
+      display:inline-block;
+      transform-origin: 50% 85%;
+      animation: flame 1.1s ease-in-out infinite;
+    }
+    @keyframes flame{
+      0%   { transform: rotate(-8deg) scale(1); filter: drop-shadow(0 0 0 rgba(255,140,0,0)); }
+      50%  { transform: rotate(9deg) scale(1.06); filter: drop-shadow(0 0 8px rgba(255,140,0,.35)); }
+      100% { transform: rotate(-8deg) scale(1); }
+    }
+
+    /* バナー：縦横ピッタリ（余白ゼロ） */
+    .banner{
+      margin-top: calc(12px * var(--scale));
+      height: var(--banner-h);
+      border-radius: 22px;
+      overflow: hidden;
+      background: rgba(255,255,255,.55);
+      border: 1px solid rgba(255,255,255,.7);
+    }
+    .banner img{
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block; /* 下の謎余白対策 */
+    }
+
+    .stats{
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: calc(12px * var(--scale));
+      margin-top: calc(12px * var(--scale));
+    }
+
+    .stat{
+      background: rgba(255,255,255,.58);
+      border: 1px solid rgba(255,255,255,.72);
+      border-radius: 20px;
+      padding: calc(12px * var(--scale));
+      box-shadow: 0 12px 26px rgba(0,0,0,.06);
+      min-height: calc(104px * var(--scale));
+    }
+
+    .stat-top{
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .stat-title{
+      font-weight: 900;
+      color: rgba(31,36,48,.75);
+      line-height: 1.05;
+    }
+    .stat-title .line1{ font-size: calc(15px * var(--scale)); }
+    .stat-title .line2{
+      font-size: calc(13px * var(--scale));
+      opacity: .75;
+      margin-top: 3px;
+    }
+
+    .icon{
+      font-size: 18px;
+      opacity: .85;
+      margin-top: 2px;
+    }
+
+    .stat-value{
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-top: calc(12px * var(--scale));
+    }
+
+    .stat-value input{
+      width: 100%;
+      max-width: 120px;
+      font-size: calc(36px * var(--scale));
+      font-weight: 950;
+      border: none;
+      outline: none;
+      background: transparent;
+      color: var(--text);
+    }
+    .stat-value input::placeholder{ color: rgba(0,0,0,0); }
+
+    .unit{
+      font-size: calc(16px * var(--scale));
+      font-weight: 900;
+      color: var(--muted);
+      margin-left: 8px;
+    }
+
+    .actions{
+      display: grid;
+      gap: calc(10px * var(--scale));
+      margin-top: calc(12px * var(--scale));
+    }
+
+    .btn{
+      height: var(--btn-h);
+      border-radius: 18px;
+      border: none;
+      font-weight: 950;
+      font-size: calc(18px * var(--scale));
+      cursor: pointer;
+      box-shadow: 0 16px 30px rgba(0,0,0,.10);
+    }
+    .btn:active{ transform: scale(.99); }
+
+    .btn.primary{
+      background: linear-gradient(90deg, #ffb04a, #ff7d1f);
+      color: white;
+    }
+    .btn.secondary{
+      background: linear-gradient(90deg, #5aa7ff, #2f6dff);
+      color: white;
+    }
+
+    .meta{
+      text-align: center;
+      margin-top: calc(10px * var(--scale));
+      color: rgba(31,36,48,.55);
+      font-weight: 800;
+      font-size: calc(13px * var(--scale));
+    }
+
+    .bottom-nav{
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: calc(12px * var(--scale));
+      margin-top: calc(12px * var(--scale));
+    }
+
+    .nav-item{
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.70);
+      background: rgba(255,255,255,.55);
+      padding: calc(12px * var(--scale)) calc(10px * var(--scale));
+      font-weight: 950;
+      box-shadow: 0 14px 26px rgba(0,0,0,.08);
+      cursor: pointer;
+    }
+    .nav-item.is-active{ background: rgba(255,255,255,.72); }
+
+    .history{
+      margin-top: calc(12px * var(--scale));
+      background: rgba(255,255,255,.62);
+      border: 1px solid rgba(255,255,255,.75);
+      border-radius: 22px;
+      box-shadow: 0 18px 40px rgba(0,0,0,.10);
+      padding: calc(14px * var(--scale));
+    }
+    .hidden{ display: none; }
+
+    .history-head{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .history-head h3{
+      margin: 0;
+      font-size: 18px;
+      font-weight: 950;
+    }
+
+    .chip{
+      border: 1px solid rgba(0,0,0,.08);
+      background: rgba(255,255,255,.65);
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .history-list{
+      display: grid;
+      gap: 10px;
+    }
+    .item{
+      border-radius: 16px;
+      background: rgba(255,255,255,.60);
+      border: 1px solid rgba(255,255,255,.75);
+      padding: 12px;
+      box-shadow: 0 10px 22px rgba(0,0,0,.06);
+    }
+    .item .top{
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      font-weight: 950;
+    }
+    .item .sub{
+      margin-top: 6px;
+      color: rgba(31,36,48,.6);
+      font-weight: 800;
+      font-size: 13px;
+    }
+  </style>
 </head>
 
 <body>
   <main class="app">
-    <!-- Header -->
     <header class="header">
       <h1 class="title">今日の体調は？</h1>
 
@@ -29,7 +364,6 @@
       </nav>
     </header>
 
-    <!-- Card -->
     <section class="card">
       <div class="badge" id="badge">
         <span class="emoji">☀️</span><span>元気</span>
@@ -38,20 +372,17 @@
       <div class="card-head">
         <h2 class="workout-title" id="workoutTitle">Fit Boxing</h2>
 
-        <!-- 継続表示（炎アニメ付き） -->
         <div class="streak" title="継続日数">
           <span class="flame" aria-hidden="true">🔥</span>
           <span class="streak-text"><span id="streakDays">0</span>日継続</span>
         </div>
       </div>
 
-      <!-- ✅ ① バナー：縦横ピッタリ（余白ゼロ／枠にフィット） -->
       <div class="banner">
         <img id="bannerImg" src="assets/fitboxing.png" alt="workout banner" />
       </div>
 
       <div class="stats">
-        <!-- ✅ ② 「今日の歩数」1行目 / 「空欄NG」2行目 -->
         <div class="stat">
           <div class="stat-top">
             <span class="icon">👟</span>
@@ -82,24 +413,18 @@
       </div>
 
       <div class="actions">
-        <button class="btn primary" id="doneBtn">
-          ✅ やった！
-        </button>
-        <button class="btn secondary" id="moreBtn">
-          ＋ もう1つやる
-        </button>
+        <button class="btn primary" id="doneBtn">✅ やった！</button>
+        <button class="btn secondary" id="moreBtn">＋ もう1つやる</button>
       </div>
 
       <div class="meta" id="metaText">記録：—</div>
     </section>
 
-    <!-- Bottom Nav -->
     <footer class="bottom-nav">
       <button class="nav-item is-active" data-view="home">🏠 ホーム</button>
       <button class="nav-item" data-view="history">🕘 履歴</button>
     </footer>
 
-    <!-- History View (overlay) -->
     <section class="history hidden" id="history">
       <div class="history-head">
         <h3>履歴</h3>
@@ -109,6 +434,191 @@
     </section>
   </main>
 
-  <script src="app.js"></script>
+  <script>
+    const MOODS = {
+      genki:   { label: "元気", emoji: "☀️", banner: "assets/fitboxing.png", title: "Fit Boxing" },
+      futsu:   { label: "ふつう", emoji: "💙", banner: "assets/ringfit.png",  title: "Ring Fit" },
+      shindoi: { label: "しんどい", emoji: "🙂", banner: "assets/yoga.png",    title: "ヨガ (Yoga)" },
+      kyukei:  { label: "休息", emoji: "🐾", banner: "assets/rest.png",       title: "Rest" },
+    };
+
+    const LS_KEY = "workout_app_records_v1";
+    const LS_STREAK = "workout_app_streak_v1";
+
+    const tabs = document.querySelectorAll(".tab");
+    const badge = document.getElementById("badge");
+    const workoutTitle = document.getElementById("workoutTitle");
+    const bannerImg = document.getElementById("bannerImg");
+
+    const stepsInput = document.getElementById("stepsInput");
+    const minsInput = document.getElementById("minsInput");
+
+    const doneBtn = document.getElementById("doneBtn");
+    const moreBtn = document.getElementById("moreBtn");
+
+    const metaText = document.getElementById("metaText");
+
+    const navItems = document.querySelectorAll(".nav-item");
+    const historyPanel = document.getElementById("history");
+    const historyList = document.getElementById("historyList");
+    const clearBtn = document.getElementById("clearBtn");
+
+    const streakDaysEl = document.getElementById("streakDays");
+
+    let currentMood = "genki";
+
+    function todayKey() {
+      const d = new Date();
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      return \`\${y}-\${m}-\${day}\`;
+    }
+
+    function yesterdayKey(key) {
+      const [y, m, d] = key.split("-").map(Number);
+      const dt = new Date(y, m - 1, d);
+      dt.setDate(dt.getDate() - 1);
+      const yy = dt.getFullYear();
+      const mm = String(dt.getMonth() + 1).padStart(2, "0");
+      const dd = String(dt.getDate()).padStart(2, "0");
+      return \`\${yy}-\${mm}-\${dd}\`;
+    }
+
+    function loadRecords() {
+      try { return JSON.parse(localStorage.getItem(LS_KEY) || "[]"); }
+      catch { return []; }
+    }
+    function saveRecords(records) {
+      localStorage.setItem(LS_KEY, JSON.stringify(records));
+    }
+
+    function loadStreak() {
+      try { return JSON.parse(localStorage.getItem(LS_STREAK) || '{"last":"","streak":0}'); }
+      catch { return { last: "", streak: 0 }; }
+    }
+    function saveStreak(data) {
+      localStorage.setItem(LS_STREAK, JSON.stringify(data));
+    }
+
+    function updateStreakUI() {
+      const s = loadStreak();
+      streakDaysEl.textContent = String(s.streak || 0);
+    }
+
+    function bumpStreakOnSave() {
+      const key = todayKey();
+      const s = loadStreak();
+
+      if (s.last === key) return; // 同日二重加算しない
+
+      if (s.last && yesterdayKey(key) === s.last) {
+        s.streak = (s.streak || 0) + 1;
+      } else {
+        s.streak = 1;
+      }
+
+      s.last = key;
+      saveStreak(s);
+    }
+
+    function setMood(mood) {
+      currentMood = mood;
+      const conf = MOODS[mood];
+
+      tabs.forEach(t => t.classList.toggle("is-active", t.dataset.mood === mood));
+      badge.innerHTML = \`<span class="emoji">\${conf.emoji}</span><span>\${conf.label}</span>\`;
+      workoutTitle.textContent = conf.title;
+      bannerImg.src = conf.banner;
+
+      metaText.textContent = \`記録：\${todayKey()}、\${conf.label}\`;
+    }
+
+    function renderHistory() {
+      const records = loadRecords().slice().reverse();
+      historyList.innerHTML = "";
+
+      if (records.length === 0) {
+        historyList.innerHTML =
+          \`<div class="item"><div class="top"><span>まだ記録がありません</span></div><div class="sub">「やった！」で保存されます</div></div>\`;
+        return;
+      }
+
+      for (const r of records) {
+        const mood = MOODS[r.mood]?.label ?? r.mood;
+        const title = r.title ?? "";
+        historyList.insertAdjacentHTML("beforeend", \`
+          <div class="item">
+            <div class="top">
+              <span>\${r.date} / \${mood}</span>
+              <span>\${title}</span>
+            </div>
+            <div class="sub">歩数: \${r.steps}歩 / 運動: \${r.mins}分</div>
+          </div>
+        \`);
+      }
+    }
+
+    function getNumberValue(el) {
+      const v = (el.value || "").trim();
+      if (!v) return null;
+      const n = Number(v);
+      if (!Number.isFinite(n)) return null;
+      return Math.max(0, Math.floor(n));
+    }
+
+    function onDone() {
+      const steps = getNumberValue(stepsInput);
+      const mins = getNumberValue(minsInput);
+
+      if (steps === null || mins === null) {
+        alert("「今日の歩数」と「運動」は空欄NGです。数字を入力してください。");
+        return;
+      }
+
+      const record = {
+        date: todayKey(),
+        mood: currentMood,
+        title: MOODS[currentMood].title,
+        steps,
+        mins,
+      };
+
+      const records = loadRecords();
+      records.push(record);
+      saveRecords(records);
+
+      bumpStreakOnSave();
+      updateStreakUI();
+      renderHistory();
+
+      stepsInput.value = "";
+      minsInput.value = "";
+    }
+
+    function setView(view) {
+      navItems.forEach(n => n.classList.toggle("is-active", n.dataset.view === view));
+      historyPanel.classList.toggle("hidden", view !== "history");
+    }
+
+    // events
+    tabs.forEach(t => t.addEventListener("click", () => setMood(t.dataset.mood)));
+    doneBtn.addEventListener("click", onDone);
+    moreBtn.addEventListener("click", () => stepsInput.focus());
+
+    navItems.forEach(n => n.addEventListener("click", () => setView(n.dataset.view)));
+
+    clearBtn.addEventListener("click", () => {
+      if (!confirm("履歴をすべて削除しますか？")) return;
+      localStorage.removeItem(LS_KEY);
+      renderHistory();
+    });
+
+    // init
+    setMood("genki");
+    updateStreakUI();
+    renderHistory();
+    setView("home");
+  </script>
 </body>
 </html>

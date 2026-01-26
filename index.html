@@ -2,754 +2,710 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#b9d8ff" />
-  <title>Workout App</title>
-
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>今日の体調は？</title>
   <style>
     :root{
-      --card: rgba(255,255,255,.60);
-      --stroke: rgba(255,255,255,.55);
-      --shadow: 0 18px 40px rgba(0,0,0,.12);
-      --shadow2: 0 10px 22px rgba(0,0,0,.10);
-      --r1: 28px;
-      --txt: #1f2630;
-      --muted:#5a6777;
-
-      --btnOrange1:#ffb04a;
-      --btnOrange2:#ff7e2f;
-      --btnBlue1:#4c92ff;
-      --btnBlue2:#2c63ff;
-
-      --safeTop: env(safe-area-inset-top);
-      --safeBottom: env(safe-area-inset-bottom);
-      --safeLeft: env(safe-area-inset-left);
-      --safeRight: env(safe-area-inset-right);
+      --bg-url: url("./assets/background.png");
+      --glass: rgba(255,255,255,.72);
+      --glass2: rgba(255,255,255,.55);
+      --shadow: 0 12px 30px rgba(0,0,0,.10);
+      --radius: 22px;
+      --radius2: 16px;
+      --text: #202534;
+      --muted: rgba(32,37,52,.65);
+      --accent: #ff8a00;
+      --accent2:#2f7bff;
     }
 
-    *{ box-sizing:border-box; }
-    html,body{ height:100%; }
+    *{ box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
     body{
       margin:0;
-      font-family: ui-sans-serif, system-ui, -apple-system, "Hiragino Sans", "Noto Sans JP", "Segoe UI", Roboto, Arial, "Apple Color Emoji","Segoe UI Emoji";
-      color: var(--txt);
-      overflow:hidden; /* スクロール無し */
+      font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,"Hiragino Sans","Noto Sans JP","Yu Gothic UI","Yu Gothic",sans-serif;
+      color:var(--text);
+      min-height:100vh;
+      background:#bcd7ff;
+    }
+
+    /* ✅ 背景が途中で途切れない fixed 背景 */
+    body::before{
+      content:"";
+      position:fixed; inset:0;
+      background-image: var(--bg-url);
+      background-size: cover;
+      background-position: center top;
+      background-repeat:no-repeat;
+      filter: saturate(1.05);
+      z-index:-2;
+      transform: translateZ(0);
+    }
+
+    /* うっすらキラキラ（CSSで軽量） */
+    body::after{
+      content:"";
+      position:fixed; inset:0;
       background:
-        radial-gradient(1200px 700px at 50% -120px, rgba(255,255,255,.55), rgba(255,255,255,0) 58%),
-        url("background.png");
-      background-size: cover, cover;
-      background-position: center top, center top;
-      background-repeat: no-repeat, no-repeat;
+        radial-gradient(circle at 15% 25%, rgba(255,255,255,.45), transparent 35%),
+        radial-gradient(circle at 80% 30%, rgba(255,255,255,.30), transparent 40%),
+        radial-gradient(circle at 55% 80%, rgba(255,255,255,.25), transparent 45%);
+      opacity:.55;
+      z-index:-1;
+      animation: sparkle 6s ease-in-out infinite alternate;
+      pointer-events:none;
+    }
+    @keyframes sparkle{
+      from{ filter: blur(0px); opacity:.45; }
+      to  { filter: blur(1.5px); opacity:.62; }
     }
 
-    .app{
-      height:100dvh;
-      padding:
-        calc(14px + var(--safeTop))
-        calc(14px + var(--safeRight))
-        calc(14px + var(--safeBottom))
-        calc(14px + var(--safeLeft));
-      display:flex;
-      justify-content:center;
-      align-items:flex-start;
+    .wrap{
+      max-width: 440px;
+      margin: 0 auto;
+      padding: 18px 16px 96px; /* 下の固定バー分 */
     }
-
-    /* 端末高さに応じて自動で小さめ（スクロール出さない） */
-    .scaleWrap{
-      width:min(420px, 100%);
-      transform-origin: top center;
-    }
-    @media (max-height: 820px){ .scaleWrap{ transform: scale(.96); } }
-    @media (max-height: 760px){ .scaleWrap{ transform: scale(.92); } }
-    @media (max-height: 700px){ .scaleWrap{ transform: scale(.88); } }
 
     h1{
-      margin: 8px 0 14px;
+      margin: 18px 0 14px;
       text-align:center;
-      font-weight: 900;
-      letter-spacing: .02em;
-      font-size: clamp(28px, 6.6vw, 44px);
-      text-shadow: 0 2px 0 rgba(255,255,255,.35);
+      font-size: 40px;
+      letter-spacing:.02em;
+      text-shadow: 0 2px 12px rgba(255,255,255,.55);
     }
 
-    .tabs{
+    /* 体調タブ（横並び4つ） */
+    .moods{
       display:grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 10px;
-      margin: 0 0 14px;
+      margin-bottom: 14px;
     }
-    .tab{
-      appearance:none;
-      border: 1px solid var(--stroke);
-      background: rgba(255,255,255,.50);
+    .moodBtn{
+      border:0;
       border-radius: 18px;
-      padding: 10px 8px;
+      padding: 12px 10px;
+      background: rgba(255,255,255,.65);
+      box-shadow: 0 10px 22px rgba(0,0,0,.10);
       font-weight: 800;
-      color: #2a3441;
-      box-shadow: 0 10px 22px rgba(0,0,0,.08);
+      color:#1f2a44;
       display:flex;
       align-items:center;
       justify-content:center;
-      gap:6px;
-      font-size: 14px;
-      line-height:1;
+      gap:8px;
       cursor:pointer;
-      user-select:none;
+      transition: transform .06s ease, filter .2s ease, background .2s ease;
+      white-space:nowrap;
     }
-    .tab.active{
-      background: rgba(255,255,255,.78);
-      border-color: rgba(255,255,255,.8);
-      box-shadow: 0 14px 28px rgba(0,0,0,.10);
-      transform: translateY(-1px);
+    .moodBtn:active{ transform: scale(.98); }
+    .moodBtn.active{
+      background: rgba(255,255,255,.85);
+      outline: 3px solid rgba(255,255,255,.55);
+      filter: saturate(1.05);
+    }
+    .moodIcon{
+      width:22px; height:22px;
+      display:inline-grid; place-items:center;
+      font-size:18px;
     }
 
+    /* メインカード */
     .card{
-      border-radius: var(--r1);
-      background: var(--card);
-      border: 1px solid rgba(255,255,255,.55);
+      background: var(--glass);
+      border-radius: 28px;
       box-shadow: var(--shadow);
-      padding: 16px;
+      padding: 16px 16px 14px;
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
     }
 
-    .pillRow{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      margin-bottom: 8px;
-    }
-    .pill{
+    .chip{
       display:inline-flex;
-      align-items:center;
       gap:8px;
-      padding: 10px 14px;
+      align-items:center;
+      padding: 8px 12px;
       border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.62);
-      background: rgba(255,255,255,.60);
-      font-weight: 900;
-      box-shadow: 0 10px 18px rgba(0,0,0,.08);
-      line-height:1;
-      white-space:nowrap;
+      background: rgba(255,255,255,.65);
+      box-shadow: 0 8px 18px rgba(0,0,0,.08);
+      font-weight: 800;
+      margin-bottom: 10px;
     }
 
-    /* 炎アニメ（継続） */
-    .flame{
-      width: 18px; height: 18px;
-      display:inline-grid;
-      place-items:center;
-      filter: drop-shadow(0 2px 4px rgba(0,0,0,.18));
-      animation: flameWiggle 1.2s ease-in-out infinite;
-      transform-origin: 50% 75%;
-    }
-    @keyframes flameWiggle{
-      0%{ transform: translateY(0) rotate(-6deg) scale(1); }
-      35%{ transform: translateY(-1px) rotate(6deg) scale(1.05); }
-      70%{ transform: translateY(0) rotate(-4deg) scale(1); }
-      100%{ transform: translateY(0) rotate(-6deg) scale(1); }
-    }
-
-    .titleRow{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap: 10px;
-      margin: 6px 0 10px;
-    }
-    .activityTitle{
+    .menuTitle{
       font-size: 44px;
-      font-weight: 1000;
-      letter-spacing: .01em;
-      margin:0;
-      line-height: .95;
-    }
-
-    /* バナー：枠に縦横ピッタリ */
-    .bannerWrap{
-      margin-top: 10px;
-      border-radius: 20px;
-      background: rgba(255,255,255,.42);
-      border: 1px solid rgba(255,255,255,.52);
-      box-shadow: var(--shadow2);
-      padding: 10px;
-    }
-    .banner{
-      width:100%;
-      aspect-ratio: 2.75 / 1;
-      border-radius: 16px;
-      overflow:hidden;
-      background: rgba(255,255,255,.35);
-      border: 1px solid rgba(255,255,255,.50);
-    }
-    .banner img{
-      width:100%;
-      height:100%;
-      display:block;
-      object-fit: cover;
-      object-position: center;
-    }
-
-    .stats{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-top: 12px;
-    }
-    .stat{
-      border-radius: 18px;
-      background: rgba(255,255,255,.60);
-      border: 1px solid rgba(255,255,255,.62);
-      box-shadow: var(--shadow2);
-      padding: 12px 12px 10px;
-      min-height: 120px;
-      display:flex;
-      flex-direction:column;
-      justify-content:space-between;
-    }
-    .statHead{
-      display:flex;
-      gap: 10px;
-      align-items:flex-start;
-      color: var(--muted);
-      font-weight: 900;
+      line-height: 1.08;
+      margin: 6px 0 12px;
       letter-spacing:.01em;
     }
-    .statIcon{
-      width: 28px; height: 28px;
-      border-radius: 50%;
-      background: rgba(0,0,0,.08);
-      display:grid;
-      place-items:center;
-      flex:0 0 auto;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.55);
+
+    .bannerFrame{
+      border-radius: 18px;
+      background: rgba(255,255,255,.55);
+      padding: 12px;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.5);
+      margin: 8px 0 14px;
     }
-    .statLabel{
-      font-size: 16px;
-      line-height: 1.05;
-    }
-    .statLabel .l1{ display:block; }
-    .statLabel .l2{ display:block; }
-    .statValueRow{
-      display:flex;
-      align-items:flex-end;
-      justify-content:space-between;
-      gap:10px;
-      margin-top: 6px;
-    }
-    .statValue{
-      font-size: 54px;
-      font-weight: 1000;
-      letter-spacing: .01em;
-      line-height:1;
-    }
-    .statUnit{
-      font-size: 20px;
-      font-weight: 900;
-      color: var(--muted);
-      padding-bottom: 4px;
+    .bannerImg{
+      width:100%;
+      height:auto;
+      display:block;
+      border-radius: 16px;
+      /* ✅ “枠が広い”問題の対策：最大高さを制限 */
+      max-height: 150px;
+      object-fit: contain;
     }
 
-    .actions{
-      display:grid;
-      grid-template-columns: 1fr;
-      gap: 12px;
-      margin-top: 12px;
-    }
-    .btn{
-      appearance:none;
-      border: none;
-      border-radius: 22px;
-      padding: 16px 14px;
-      font-weight: 1000;
-      font-size: 22px;
-      color: white;
-      cursor:pointer;
-      box-shadow: 0 16px 32px rgba(0,0,0,.16);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:10px;
-      user-select:none;
-    }
-    .btn.orange{ background: linear-gradient(90deg, var(--btnOrange1), var(--btnOrange2)); }
-    .btn.blue{ background: linear-gradient(90deg, #9aa6b5, #6f7d90); }
-
-    .recordLine{
-      margin-top: 10px;
-      text-align:center;
-      font-weight: 900;
-      color: rgba(31,38,48,.70);
-    }
-
-    .nav{
-      margin-top: 12px;
+    .inputs{
       display:grid;
       grid-template-columns: 1fr 1fr;
-      gap: 14px;
+      gap: 12px;
+      margin: 10px 0 12px;
     }
-    .navBtn{
-      appearance:none;
-      border: 1px solid rgba(255,255,255,.55);
-      background: rgba(255,255,255,.40);
+    .inputBox{
+      background: rgba(255,255,255,.72);
       border-radius: 18px;
-      padding: 12px 10px;
-      font-weight: 1000;
-      color: #2a3441;
-      box-shadow: var(--shadow2);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:8px;
-      cursor:pointer;
+      padding: 12px 12px 10px;
+      box-shadow: 0 10px 20px rgba(0,0,0,.07);
+      border: 1px solid rgba(255,255,255,.6);
     }
-    .navBtn.active{
-      background: rgba(255,255,255,.65);
-    }
-
-    .view{ display:none; }
-    .view.active{ display:block; }
-
-    .historyList{
-      margin-top: 12px;
-      display:flex;
-      flex-direction:column;
-      gap: 10px;
-      max-height: 42dvh;
-      overflow:auto;
-      padding-right: 2px;
-    }
-    .historyItem{
-      border-radius: 18px;
-      background: rgba(255,255,255,.62);
-      border: 1px solid rgba(255,255,255,.65);
-      box-shadow: var(--shadow2);
-      padding: 12px;
-      display:flex;
-      justify-content:space-between;
-      gap: 10px;
-      align-items:center;
+    .label{
       font-weight: 900;
+      color: rgba(31,42,68,.82);
+      display:flex; align-items:center; gap:8px;
+      margin-bottom: 8px;
     }
-    .historyItem small{
-      font-weight: 800;
-      color: rgba(31,38,48,.65);
-      display:block;
+    .label small{ font-weight: 800; color: rgba(31,42,68,.55); }
+    input[type="number"]{
+      width:100%;
+      font-size: 36px;
+      font-weight: 900;
+      border:0;
+      outline:0;
+      background: transparent;
+      color: #1b2338;
+    }
+    .unit{
+      text-align:right;
+      color: rgba(31,42,68,.60);
+      font-weight:900;
       margin-top: 2px;
     }
 
-    .dangerRow{
-      margin-top: 10px;
-      display:flex;
-      justify-content:center;
+    .btnRow{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin-top: 6px;
     }
-    .danger{
-      appearance:none;
-      background: rgba(255,255,255,.35);
-      border: 1px solid rgba(255,255,255,.55);
-      padding: 10px 14px;
-      border-radius: 999px;
+    .btn{
+      border:0;
+      border-radius: 18px;
+      padding: 16px 14px;
+      font-size: 22px;
       font-weight: 1000;
-      color: rgba(180,40,40,.9);
+      color:white;
+      cursor:pointer;
+      box-shadow: 0 14px 26px rgba(0,0,0,.14);
+      transition: transform .06s ease, filter .2s ease, opacity .2s ease;
+    }
+    .btn:active{ transform: scale(.99); }
+    .btnPrimary{ background: linear-gradient(90deg, #ffb14a, #ff7a00); }
+    .btnSecond{ background: linear-gradient(90deg, #59a7ff, #2b62ff); }
+
+    .btn[disabled]{
+      opacity:.45;
+      filter: grayscale(.2);
+      cursor:not-allowed;
+    }
+
+    .recordLine{
+      text-align:center;
+      margin-top: 10px;
+      color: rgba(31,42,68,.70);
+      font-weight: 800;
+    }
+
+    /* 下の固定バー */
+    .nav{
+      position: fixed;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: 14px;
+      width: min(440px, calc(100% - 24px));
+      background: rgba(255,255,255,.70);
+      border-radius: 22px;
+      box-shadow: 0 16px 32px rgba(0,0,0,.16);
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      overflow:hidden;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .navBtn{
+      border:0;
+      background: transparent;
+      padding: 12px 10px;
+      font-weight: 900;
+      color: rgba(31,42,68,.72);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      font-size: 18px;
       cursor:pointer;
     }
+    .navBtn.active{
+      background: rgba(143,193,255,.25);
+      color:#1f2a44;
+    }
+    .navIcon{ font-size: 22px; }
+
+    /* 履歴画面 */
+    .hidden{ display:none; }
+    .historyTop{
+      display:flex; justify-content:space-between; align-items:center;
+      gap:10px;
+      margin-bottom: 10px;
+    }
+    .hTitle{ font-size: 26px; font-weight:1000; margin: 0; }
+    .miniBtn{
+      border:0;
+      border-radius: 14px;
+      padding: 10px 12px;
+      font-weight: 900;
+      background: rgba(255,255,255,.70);
+      box-shadow: 0 10px 20px rgba(0,0,0,.10);
+      cursor:pointer;
+    }
+
+    .list{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .row{
+      background: rgba(255,255,255,.72);
+      border-radius: 18px;
+      padding: 12px 12px;
+      box-shadow: 0 10px 20px rgba(0,0,0,.08);
+      display:grid;
+      grid-template-columns: 1fr auto;
+      gap:10px;
+      align-items:center;
+    }
+    .rowMain{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+      min-width:0;
+    }
+    .rowMain b{ font-size: 16px; }
+    .rowMain span{ color: rgba(31,42,68,.68); font-weight: 800; font-size: 13px; }
+    .danger{
+      background: rgba(255,80,80,.12);
+    }
+    .delBtn{
+      border:0;
+      border-radius: 14px;
+      padding: 10px 12px;
+      font-weight: 1000;
+      background: rgba(255,120,120,.15);
+      color:#b01010;
+      cursor:pointer;
+    }
+
+    /* ✅ 連続記録（炎）モーダル：あとで②で本格化。今は最低限の土台だけ入れてる */
+    .modalBg{
+      position:fixed; inset:0;
+      background: rgba(0,0,0,.25);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding: 18px;
+      z-index: 50;
+    }
+    .modal{
+      width: min(420px, 100%);
+      background: rgba(255,255,255,.85);
+      border-radius: 28px;
+      box-shadow: 0 30px 70px rgba(0,0,0,.30);
+      padding: 22px 18px 18px;
+      text-align:center;
+      backdrop-filter: blur(10px);
+    }
+    .flame{
+      width: 90px; height: 90px;
+      margin: 0 auto 10px;
+      border-radius: 28px;
+      background: radial-gradient(circle at 35% 35%, #fff3, transparent 55%),
+                  radial-gradient(circle at 50% 65%, #ffd56a, #ff7a00 60%, #ff2f2f 90%);
+      filter: drop-shadow(0 14px 20px rgba(255,122,0,.30));
+      animation: flamePop .9s ease-in-out infinite alternate;
+      position:relative;
+    }
+    .flame::after{
+      content:"";
+      position:absolute;
+      inset: 14px 24px 22px 24px;
+      border-radius: 999px;
+      background: radial-gradient(circle at 45% 45%, #fff, #fff0 65%);
+      opacity:.75;
+    }
+    @keyframes flamePop{
+      from{ transform: translateY(0) scale(1); }
+      to  { transform: translateY(-4px) scale(1.03); }
+    }
+    .streakNum{
+      font-size: 64px;
+      font-weight: 1000;
+      margin: 0;
+      color: #ff7a00;
+      text-shadow: 0 6px 18px rgba(255,122,0,.25);
+    }
+    .modalBtn{
+      margin-top: 12px;
+      width: 100%;
+      border:0;
+      border-radius: 16px;
+      padding: 14px 14px;
+      font-weight: 1000;
+      font-size: 18px;
+      background: rgba(43,98,255,.12);
+      color:#1f2a44;
+      cursor:pointer;
+    }
+
   </style>
 </head>
-
 <body>
-  <div class="app">
-    <div class="scaleWrap">
+  <div class="wrap">
+    <section id="homeView">
       <h1>今日の体調は？</h1>
 
-      <div class="tabs" id="tabs">
-        <button class="tab" type="button" data-mood="genki">☀️ 元気</button>
-        <button class="tab" type="button" data-mood="futsu">💙 ふつう</button>
-        <button class="tab" type="button" data-mood="shindoi">🙂 しんどい</button>
-        <button class="tab" type="button" data-mood="rest">🐾 休息</button>
+      <div class="moods" id="moods">
+        <button class="moodBtn" data-mood="genki"><span class="moodIcon">☀️</span>元気</button>
+        <button class="moodBtn" data-mood="futsu"><span class="moodIcon">💙</span>ふつう</button>
+        <button class="moodBtn" data-mood="shindoi"><span class="moodIcon">🙂</span>しんどい</button>
+        <button class="moodBtn" data-mood="rest"><span class="moodIcon">🐾</span>休息</button>
       </div>
 
-      <!-- HOME -->
-      <div class="view active" id="viewHome">
-        <div class="card">
-          <div class="pillRow">
-            <div class="pill" id="moodLabel">☀️ 元気</div>
-            <div class="pill"><span class="flame">🔥</span><span id="streakText">0日継続</span></div>
-          </div>
+      <div class="card">
+        <div class="chip" id="chip"><span id="chipIcon">🐾</span><span id="chipText">休息</span></div>
 
-          <div class="titleRow">
-            <h2 class="activityTitle" id="activityTitle">Fit Boxing</h2>
-          </div>
+        <div class="menuTitle" id="menuTitle">Rest</div>
 
-          <div class="bannerWrap">
-            <div class="banner">
-              <img id="bannerImg" alt="banner" src="fitboxing.png" />
-            </div>
-          </div>
-
-          <div class="stats">
-            <div class="stat">
-              <div class="statHead">
-                <div class="statIcon">👟</div>
-                <div class="statLabel">
-                  <span class="l1">今日の歩数</span>
-                  <span class="l2">（空欄NG）</span>
-                </div>
-              </div>
-              <div class="statValueRow">
-                <div class="statValue" id="stepsValue">0</div>
-                <div class="statUnit">歩</div>
-              </div>
-            </div>
-
-            <div class="stat">
-              <div class="statHead">
-                <div class="statIcon">🕒</div>
-                <div class="statLabel">
-                  <span class="l1">運動</span>
-                  <span class="l2">（空欄NG）</span>
-                </div>
-              </div>
-              <div class="statValueRow">
-                <div class="statValue" id="minsValue">0</div>
-                <div class="statUnit">分</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="actions">
-            <button class="btn orange" id="doneBtn" type="button">✅ やった！</button>
-            <button class="btn blue" id="moreBtn" type="button">🎲 元気のときだけ再抽選</button>
-          </div>
-
-          <div class="recordLine" id="recordLine">記録：—</div>
+        <div class="bannerFrame">
+          <img id="bannerImg" class="bannerImg" src="./assets/rest.png" alt="banner" />
         </div>
 
-        <div class="nav">
-          <button class="navBtn active" id="navHome" type="button">🏠 ホーム</button>
-          <button class="navBtn" id="navHistory" type="button">🕘 履歴</button>
+        <div class="inputs">
+          <div class="inputBox">
+            <div class="label">👟 今日の歩数 <small>(空欄NG)</small></div>
+            <input id="steps" type="number" inputmode="numeric" min="0" placeholder="" />
+            <div class="unit">歩</div>
+          </div>
+          <div class="inputBox">
+            <div class="label">🕒 運動 <small>(空欄NG)</small></div>
+            <input id="mins" type="number" inputmode="numeric" min="0" placeholder="" />
+            <div class="unit">分</div>
+          </div>
+        </div>
+
+        <div class="btnRow">
+          <button id="doneBtn" class="btn btnPrimary" disabled>✅ やった！</button>
+          <button id="moreBtn" class="btn btnSecond">＋ もう1つやる</button>
+        </div>
+
+        <div class="recordLine" id="recordLine">記録: -</div>
+      </div>
+    </section>
+
+    <section id="historyView" class="hidden">
+      <div class="historyTop">
+        <h2 class="hTitle">履歴</h2>
+        <div style="display:flex; gap:8px;">
+          <button class="miniBtn" id="exportBtn">Excel(CSV)出力</button>
+          <button class="miniBtn" id="clearBtn">全削除</button>
         </div>
       </div>
+      <div class="list" id="list"></div>
+    </section>
+  </div>
 
-      <!-- HISTORY -->
-      <div class="view" id="viewHistory">
-        <div class="card">
-          <div class="pillRow">
-            <div class="pill">🕘 履歴</div>
-            <div class="pill" id="historyCount">0件</div>
-          </div>
+  <div class="nav">
+    <button class="navBtn active" id="navHome"><span class="navIcon">🏠</span>ホーム</button>
+    <button class="navBtn" id="navHistory"><span class="navIcon">🕘</span>履歴</button>
+  </div>
 
-          <div class="historyList" id="historyList"></div>
-
-          <div class="dangerRow">
-            <button class="danger" id="clearBtn" type="button">履歴をすべて削除</button>
-          </div>
-        </div>
-
-        <div class="nav">
-          <button class="navBtn" id="navHome2" type="button">🏠 ホーム</button>
-          <button class="navBtn active" id="navHistory2" type="button">🕘 履歴</button>
-        </div>
-      </div>
+  <!-- 連続記録モーダル（土台） -->
+  <div class="modalBg" id="modalBg">
+    <div class="modal">
+      <div class="flame" aria-hidden="true"></div>
+      <p class="streakNum" id="streakNum">1</p>
+      <button class="modalBtn" id="closeModal">閉じる</button>
     </div>
   </div>
 
-<script>
-  /***************
-   * 画像名（あなた指定の確定版）
-   ***************/
-  const IMG = {
-    background: "background.png",
-    genkiRandom: [
-      { key:"fitboxing", title:"Fit Boxing", img:"fitboxing.png" },
-      { key:"ringfit", title:"Ring Fit", img:"ringfit.png" },
-      { key:"hopstepdance", title:"HOP!STEP!DANCE!", img:"hopstepdance.png" },
-    ],
-    futsu:   { key:"fitboxing", title:"Fit Boxing", img:"fitboxing.png" },
-    shindoi: { key:"yoga", title:"Yoga", img:"yoga.png" },
-    rest:    { key:"rest", title:"Rest", img:"rest.png" },
-  };
+  <script>
+    const $ = (s)=>document.querySelector(s);
 
-  /***************
-   * storage
-   ***************/
-  const LS_KEY = "workout_app_v3";
-  const $ = (q)=>document.querySelector(q);
-
-  function todayKey(){
-    const d = new Date();
-    const y = d.getFullYear();
-    const m = String(d.getMonth()+1).padStart(2,"0");
-    const da = String(d.getDate()).padStart(2,"0");
-    return `${y}-${m}-${da}`;
-  }
-
-  function loadState(){
-    try { return JSON.parse(localStorage.getItem(LS_KEY)) || {}; }
-    catch { return {}; }
-  }
-  function saveState(s){ localStorage.setItem(LS_KEY, JSON.stringify(s)); }
-
-  let state = loadState();
-  state.mood = state.mood || "genki";
-  state.choice = state.choice || null; // その日の表示メニュー
-  state.history = Array.isArray(state.history) ? state.history : [];
-  state.streak = Number.isFinite(state.streak) ? state.streak : 0;
-  state.lastDoneDate = state.lastDoneDate || "";
-
-  /***************
-   * refs
-   ***************/
-  const moodLabel = $("#moodLabel");
-  const streakText = $("#streakText");
-  const activityTitle = $("#activityTitle");
-  const bannerImg = $("#bannerImg");
-  const stepsValue = $("#stepsValue");
-  const minsValue = $("#minsValue");
-  const recordLine = $("#recordLine");
-
-  const viewHome = $("#viewHome");
-  const viewHistory = $("#viewHistory");
-  const navHome = $("#navHome");
-  const navHistory = $("#navHistory");
-  const navHome2 = $("#navHome2");
-  const navHistory2 = $("#navHistory2");
-
-  const historyList = $("#historyList");
-  const historyCount = $("#historyCount");
-  const clearBtn = $("#clearBtn");
-
-  const doneBtn = $("#doneBtn");
-  const moreBtn = $("#moreBtn");
-
-  /***************
-   * view
-   ***************/
-  function setView(v){
-    const isHome = v === "home";
-    viewHome.classList.toggle("active", isHome);
-    viewHistory.classList.toggle("active", !isHome);
-
-    navHome.classList.toggle("active", isHome);
-    navHistory.classList.toggle("active", !isHome);
-    navHome2.classList.toggle("active", isHome);
-    navHistory2.classList.toggle("active", !isHome);
-
-    if (!isHome) renderHistory();
-  }
-
-  function setMood(mood){
-    state.mood = mood;
-    saveState(state);
-
-    document.querySelectorAll("[data-mood]").forEach(btn=>{
-      btn.classList.toggle("active", btn.dataset.mood === mood);
-    });
-
-    const map = { genki:"☀️ 元気", futsu:"💙 ふつう", shindoi:"🙂 しんどい", rest:"🐾 休息" };
-    moodLabel.textContent = map[mood] || "💙 ふつう";
-
-    // モードに応じたメニュー表示を更新
-    ensureChoice();
-    renderChoice();
-    renderTodayPreview();
-  }
-
-  function randomPick(arr){
-    return arr[Math.floor(Math.random() * arr.length)];
-  }
-
-  function ensureChoice(){
-    // “同じ日に見せるメニュー”を保持したいので、今日の日付とセットで保存
-    const key = todayKey();
-
-    if (state.choice && state.choice.date === key) return;
-
-    // 日付が変わったら新規に作る
-    let picked;
-    if (state.mood === "genki") picked = randomPick(IMG.genkiRandom);
-    else if (state.mood === "futsu") picked = IMG.futsu;
-    else if (state.mood === "shindoi") picked = IMG.shindoi;
-    else picked = IMG.rest;
-
-    state.choice = { date: key, ...picked };
-    saveState(state);
-  }
-
-  function renderChoice(){
-    if (!state.choice) return;
-    activityTitle.textContent = state.choice.title;
-    bannerImg.src = state.choice.img;
-  }
-
-  function updateStreakUI(){
-    streakText.textContent = `${state.streak}日継続`;
-  }
-
-  function renderTodayPreview(){
-    const key = todayKey();
-    const today = state.history.find(h => h.date === key);
-    if (!today){
-      stepsValue.textContent = "0";
-      minsValue.textContent = "0";
-      recordLine.textContent = "記録：—";
-      return;
-    }
-    stepsValue.textContent = String(today.steps);
-    minsValue.textContent = String(today.mins);
-    recordLine.textContent = `記録：${today.date}`;
-  }
-
-  function renderHistory(){
-    historyList.innerHTML = "";
-    const items = [...state.history].sort((a,b)=> (a.date < b.date ? 1 : -1));
-    historyCount.textContent = `${items.length}件`;
-
-    if (items.length === 0){
-      const div = document.createElement("div");
-      div.className = "historyItem";
-      div.textContent = "まだ記録がありません";
-      historyList.appendChild(div);
-      return;
-    }
-
-    items.forEach(h=>{
-      const row = document.createElement("div");
-      row.className = "historyItem";
-
-      const left = document.createElement("div");
-      left.innerHTML = `${h.title}<small>${h.date} / ${h.moodLabel}</small>`;
-
-      const right = document.createElement("div");
-      right.textContent = `${h.steps}歩 / ${h.mins}分`;
-
-      row.appendChild(left);
-      row.appendChild(right);
-      historyList.appendChild(row);
-    });
-  }
-
-  /***************
-   * input helpers
-   ***************/
-  function promptNumber(label){
-    const s = prompt(label);
-    if (s === null) return null; // キャンセル
-    const t = String(s).trim();
-    // 空欄NG（0でも入力必須）
-    if (t === "") return NaN;
-    const n = Number(t);
-    if (!Number.isFinite(n) || n < 0) return NaN;
-    return Math.floor(n);
-  }
-
-  function calcStreakOnDone(dateStr){
-    // 同日2回押しても継続は増やさない（履歴は上書き）
-    if (state.lastDoneDate === dateStr) return;
-
-    if (!state.lastDoneDate){
-      state.streak = 1;
-      state.lastDoneDate = dateStr;
-      return;
-    }
-
-    const last = new Date(state.lastDoneDate + "T00:00:00");
-    const today = new Date(dateStr + "T00:00:00");
-    const diffDays = Math.round((today - last) / (1000*60*60*24));
-
-    if (diffDays === 1) state.streak += 1;
-    else if (diffDays > 1) state.streak = 1;
-
-    state.lastDoneDate = dateStr;
-  }
-
-  /***************
-   * actions
-   ***************/
-  function saveDone(){
-    ensureChoice();
-
-    const steps = promptNumber("今日の歩数（空欄NG）を数字で入力してね（0でもOK）");
-    if (steps === null) return;
-    if (Number.isNaN(steps)) { alert("空欄NGです。0でもいいので数字を入力してください"); return; }
-
-    const mins = promptNumber("運動（空欄NG）を分で入力してね（0でもOK）");
-    if (mins === null) return;
-    if (Number.isNaN(mins)) { alert("空欄NGです。0でもいいので数字を入力してください"); return; }
-
-    const dateStr = todayKey();
-    const moodMap = { genki:"☀️ 元気", futsu:"💙 ふつう", shindoi:"🙂 しんどい", rest:"🐾 休息" };
-
-    const rec = {
-      date: dateStr,
-      mood: state.mood,
-      moodLabel: moodMap[state.mood] || "",
-      title: state.choice.title,
-      activityKey: state.choice.key,
-      img: state.choice.img,
-      steps, mins
+    // ---- 設定（メニュー）----
+    const MENUS = {
+      genki: [
+        { title:"Fit Boxing", img:"./assets/fitboxing.png" },
+        { title:"Ring Fit", img:"./assets/ringfit.png" },
+        { title:"HOP! STEP! DANCE!", img:"./assets/hopstepdance.png" },
+      ],
+      futsu: [
+        { title:"Ring Fit（ウォーキングモード）＋YouTube 1本", img:"./assets/ringfit.png" },
+      ],
+      shindoi: [
+        { title:"YouTube ヨガ 1本 + 寝る前ストレッチ 1本", img:"./assets/yoga.png" },
+      ],
+      rest: [
+        { title:"Rest", img:"./assets/rest.png" },
+      ],
     };
 
-    // 1日1件で上書き（“その日1回でも押す”ルールに合う）
-    const idx = state.history.findIndex(h=>h.date===dateStr);
-    if (idx >= 0) state.history[idx] = rec;
-    else state.history.push(rec);
+    const MOOD_LABEL = {
+      genki: { text:"元気", icon:"☀️" },
+      futsu: { text:"ふつう", icon:"💙" },
+      shindoi:{ text:"しんどい", icon:"🙂" },
+      rest:  { text:"休息", icon:"🐾" },
+    };
 
-    calcStreakOnDone(dateStr);
-    saveState(state);
+    // localStorage keys
+    const KEY = "workout_logs_v1";
 
-    updateStreakUI();
-    renderTodayPreview();
-    alert("やった！記録しました ✅");
-  }
-
-  function rerollGenki(){
-    if (state.mood !== "genki"){
-      alert("再抽選は「元気」のときだけです！");
-      return;
+    function todayISO(){
+      const d = new Date();
+      const y = d.getFullYear();
+      const m = String(d.getMonth()+1).padStart(2,"0");
+      const day = String(d.getDate()).padStart(2,"0");
+      return `${y}-${m}-${day}`;
     }
-    // 今日のchoiceを上書きして再抽選
-    const key = todayKey();
-    const picked = randomPick(IMG.genkiRandom);
-    state.choice = { date: key, ...picked };
-    saveState(state);
-    renderChoice();
-  }
 
-  /***************
-   * events（クリック壊れにくい委譲）
-   ***************/
-  document.addEventListener("click", (e)=>{
-    const moodBtn = e.target.closest("[data-mood]");
-    if (moodBtn){
-      setMood(moodBtn.dataset.mood);
-      return;
+    function loadLogs(){
+      try{ return JSON.parse(localStorage.getItem(KEY) || "[]"); }
+      catch(e){ return []; }
     }
-  });
+    function saveLogs(logs){
+      localStorage.setItem(KEY, JSON.stringify(logs));
+    }
 
-  doneBtn.addEventListener("click", saveDone);
-  moreBtn.addEventListener("click", rerollGenki);
+    // ✅ 連続日数：その日に1回でも「やった！」があればOK（休息も含む）
+    function calcStreakDays(logs){
+      const days = new Set(logs.map(x=>x.date));
+      // 連続判定は「今日から遡る」
+      let streak = 0;
+      let cur = new Date();
+      for(;;){
+        const iso = cur.toISOString().slice(0,10);
+        if(days.has(iso)){
+          streak++;
+          cur.setDate(cur.getDate()-1);
+        }else{
+          break;
+        }
+      }
+      return streak;
+    }
 
-  navHome.addEventListener("click", ()=>setView("home"));
-  navHistory.addEventListener("click", ()=>setView("history"));
-  navHome2.addEventListener("click", ()=>setView("home"));
-  navHistory2.addEventListener("click", ()=>setView("history"));
+    // ---- 状態 ----
+    let mood = "rest";
+    let currentMenu = MENUS.rest[0];
 
-  clearBtn.addEventListener("click", ()=>{
-    if (!confirm("履歴をすべて削除しますか？")) return;
-    state.history = [];
-    saveState(state);
-    renderHistory();
-    renderTodayPreview();
-  });
+    function pickMenu(m){
+      if(m==="genki"){
+        // 元気だけランダム（再抽選ボタンは不要、でも「もう1つやる」で出す）
+        const arr = MENUS.genki;
+        return arr[Math.floor(Math.random()*arr.length)];
+      }
+      return MENUS[m][0];
+    }
 
-  /***************
-   * init
-   ***************/
-  ensureChoice();
-  updateStreakUI();
-  setMood(state.mood);     // これが renderChoice も呼ぶ
-  renderTodayPreview();
-  setView("home");
-</script>
+    function setMood(m){
+      mood = m;
+      currentMenu = pickMenu(m);
+      render();
+    }
+
+    function render(){
+      // mood button active
+      document.querySelectorAll(".moodBtn").forEach(btn=>{
+        btn.classList.toggle("active", btn.dataset.mood === mood);
+      });
+
+      $("#chipIcon").textContent = MOOD_LABEL[mood].icon;
+      $("#chipText").textContent = MOOD_LABEL[mood].text;
+
+      $("#menuTitle").textContent = currentMenu.title;
+      $("#bannerImg").src = currentMenu.img;
+
+      // 入力欄：空欄NG（0でも入力すればOK）
+      validateInputs();
+
+      // 最終記録表示
+      const logs = loadLogs();
+      const last = logs[0];
+      $("#recordLine").textContent = last
+        ? `記録: ${last.date}, ${MOOD_LABEL[last.mood].text}, 歩数${last.steps} / ${last.mins}分`
+        : "記録: -";
+    }
+
+    function validateInputs(){
+      const s = $("#steps").value;
+      const m = $("#mins").value;
+      const ok = (s !== "" && m !== "");
+      $("#doneBtn").disabled = !ok;
+    }
+
+    // ---- 履歴描画 ----
+    function renderHistory(){
+      const logs = loadLogs();
+      const list = $("#list");
+      list.innerHTML = "";
+      if(logs.length === 0){
+        const div = document.createElement("div");
+        div.className = "row";
+        div.innerHTML = `<div class="rowMain"><b>まだ履歴がありません</b><span>「やった！」で記録されます</span></div>`;
+        list.appendChild(div);
+        return;
+      }
+
+      logs.forEach((x, idx)=>{
+        const row = document.createElement("div");
+        row.className = "row";
+        row.innerHTML = `
+          <div class="rowMain">
+            <b>${x.date} ・ ${MOOD_LABEL[x.mood].text} ・ ${x.menu}</b>
+            <span>歩数 ${x.steps} / 運動 ${x.mins}分 ・ ${new Date(x.ts).toLocaleString("ja-JP")}</span>
+          </div>
+          <button class="delBtn" data-idx="${idx}">消す</button>
+        `;
+        list.appendChild(row);
+      });
+
+      list.querySelectorAll(".delBtn").forEach(btn=>{
+        btn.addEventListener("click", ()=>{
+          const i = Number(btn.dataset.idx);
+          const logs2 = loadLogs();
+          logs2.splice(i,1);
+          saveLogs(logs2);
+          renderHistory();
+        });
+      });
+    }
+
+    // ---- 画面切り替え ----
+    function showHome(){
+      $("#homeView").classList.remove("hidden");
+      $("#historyView").classList.add("hidden");
+      $("#navHome").classList.add("active");
+      $("#navHistory").classList.remove("active");
+    }
+    function showHistory(){
+      $("#homeView").classList.add("hidden");
+      screenToTop();
+      $("#historyView").classList.remove("hidden");
+      $("#navHome").classList.remove("active");
+      $("#navHistory").classList.add("active");
+      renderHistory();
+    }
+    function screenToTop(){
+      window.scrollTo({top:0, behavior:"smooth"});
+    }
+
+    // ---- イベント ----
+    $("#moods").addEventListener("click", (e)=>{
+      const btn = e.target.closest(".moodBtn");
+      if(!btn) return;
+      setMood(btn.dataset.mood);
+    });
+
+    $("#steps").addEventListener("input", validateInputs);
+    $("#mins").addEventListener("input", validateInputs);
+
+    $("#moreBtn").addEventListener("click", ()=>{
+      // 「もう1つやる」＝今の体調のまま、メニューだけもう1回出す
+      // 元気：ランダム、他：固定（変わらない）
+      currentMenu = pickMenu(mood);
+      render();
+      screenToTop();
+    });
+
+    $("#doneBtn").addEventListener("click", ()=>{
+      const steps = $("#steps").value;
+      const mins  = $("#mins").value;
+      if(steps==="" || mins===""){ validateInputs(); return; }
+
+      const log = {
+        date: todayISO(),
+        mood,
+        menu: currentMenu.title,
+        steps: Number(steps),
+        mins: Number(mins),
+        ts: Date.now()
+      };
+
+      const logs = loadLogs();
+      logs.unshift(log);
+      saveLogs(logs);
+
+      // ✅ 継続日数モーダル表示（炎アニメの土台）
+      const streak = calcStreakDays(loadLogs());
+      $("#streakNum").textContent = String(streak);
+      $("#modalBg").style.display = "flex";
+
+      render();
+    });
+
+    $("#closeModal").addEventListener("click", ()=>{
+      $("#modalBg").style.display = "none";
+    });
+    $("#modalBg").addEventListener("click", (e)=>{
+      if(e.target.id==="modalBg") $("#modalBg").style.display = "none";
+    });
+
+    $("#navHome").addEventListener("click", showHome);
+    $("#navHistory").addEventListener("click", showHistory);
+
+    $("#clearBtn").addEventListener("click", ()=>{
+      if(confirm("履歴をすべて削除します。よろしいですか？")){
+        saveLogs([]);
+        renderHistory();
+      }
+    });
+
+    // Excel(CSV)出力
+    $("#exportBtn").addEventListener("click", ()=>{
+      const logs = loadLogs().slice().reverse(); // 古い→新しい
+      const header = ["date","mood","menu","steps","mins","timestamp"];
+      const rows = logs.map(x=>[
+        x.date,
+        MOOD_LABEL[x.mood].text,
+        x.menu,
+        x.steps,
+        x.mins,
+        new Date(x.ts).toISOString()
+      ]);
+
+      const csv = [header, ...rows]
+        .map(r=>r.map(v=>String(v).replaceAll('"','""')).map(v=>`"${v}"`).join(","))
+        .join("\n");
+
+      const blob = new Blob([csv], {type:"text/csv;charset=utf-8"});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "workout_logs.csv";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    });
+
+    // 初期化
+    setMood("rest");
+    showHome();
+  </script>
 </body>
 </html>

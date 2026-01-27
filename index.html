@@ -412,107 +412,138 @@
     }
 
     /* ✅ 炎を “卵” っぽくしない：先端を尖らせる形へ */
-    .flame{
-      width: 120px; height: 150px;
-      position: relative;
-      filter: drop-shadow(0 18px 28px rgba(0,0,0,.15));
-      transform-origin: 50% 80%;
-    }
-    .flame .outer{
-      position:absolute; inset:0;
-      /* 下は丸め、上は尖らせる */
-      border-radius: 70% 30% 62% 38% / 55% 55% 45% 45%;
-      transform: rotate(-12deg);
-      background:
-        radial-gradient(circle at 50% 72%, rgba(255,255,255,.35), rgba(255,255,255,0) 40%),
-        linear-gradient(180deg, var(--flameA), var(--flameB), var(--flameC));
-      animation: flame 1.15s ease-in-out infinite;
-    }
-    .flame .inner{
-      position:absolute;
-      left: 26px; top: 34px;
-      width: 70px; height: 88px;
-      border-radius: 72% 28% 64% 36% / 54% 56% 44% 46%;
-      transform: rotate(10deg);
-      background:
-        radial-gradient(circle at 50% 70%, rgba(255,255,255,.65), rgba(255,255,255,0) 55%),
-        linear-gradient(180deg, var(--flameInnerA), var(--flameInnerB), var(--flameInnerC));
-      animation: flame2 1.15s ease-in-out infinite;
-    }
-    .flame .core{
-      position:absolute;
-      left: 46px; top: 60px;
-      width: 34px; height: 46px;
-      border-radius: 70% 30% 64% 36% / 58% 58% 42% 42%;
-      transform: rotate(-6deg);
-      background: linear-gradient(180deg, #ffffff, #fff1c6);
-      opacity:.95;
-      animation: pulse .9s ease-in-out infinite;
-    }
+/* ====== STREAK FLAME (fixed shape + flicker + ignite pop) ====== */
 
-    @keyframes flame{
-      0%,100%{ transform: translateY(0) rotate(-12deg) scale(1); }
-      50%{ transform: translateY(-7px) rotate(-10deg) scale(1.03); }
-    }
-    @keyframes flame2{
-      0%,100%{ transform: translateY(0) rotate(10deg) scale(1); opacity:.95;}
-      50%{ transform: translateY(-5px) rotate(8deg) scale(1.03); opacity:1;}
-    }
-    @keyframes pulse{
-      0%,100%{ transform: scale(1); }
-      50%{ transform: scale(1.08); }
-    }
+.flame{
+  width: 120px;
+  height: 160px;               /* しっかり縦長＝炎っぽさ */
+  position: relative;
+  filter: drop-shadow(0 18px 28px rgba(0,0,0,.15));
+  transform-origin: 50% 85%;
+}
 
-    /* ✅ 画面表示時の「着火→ボワン」 */
-    .flame.is-ignite{
-      animation: ignitePop 520ms cubic-bezier(.2,.95,.2,1) both;
-    }
-    @keyframes ignitePop{
-      0%   { transform: translateY(12px) scale(.84); filter: blur(2px); opacity:0; }
-      45%  { transform: translateY(-20px) scale(1.12); filter: blur(0px); opacity:1; }
-      70%  { transform: translateY(5px)  scale(.98); }
-      100% { transform: translateY(0)    scale(1); }
-    }
-    .flame.is-ignite .outer{
-      box-shadow: 0 0 62px var(--flameGlow);
-    }
+/* 外側：形は固定（ここを動かすとダイヤ化しやすいので固定） */
+.flame .outer{
+  position:absolute;
+  inset:0;
 
-    .streakNum{
-      font-size: 86px;
-      font-weight: 1000;
-      line-height: 1;
-      margin: 0;
-      background: linear-gradient(180deg, var(--flameNumA), var(--flameNumB));
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-      text-shadow: 0 18px 38px rgba(255,110,60,.22);
-      transform: translateY(6px);
-    }
-    .streakLabel{
-      font-weight: 950;
-      color: var(--flameLabel);
-      letter-spacing:.02em;
-      margin-top:-6px;
-    }
+  /* 炎らしい固定形（角が立ちにくい） */
+  border-radius: 50% 50% 62% 62% / 62% 62% 38% 38%;
 
-    .streakBtns{
-      width: min(520px, 100%);
-      display:grid;
-      grid-template-columns: 1fr;
-      gap: 12px;
-      margin-top: 12px;
-    }
+  /* “炎の外側グラデ”は既存の変数でOK */
+  background:
+    radial-gradient(circle at 48% 62%, rgba(255,255,255,.28), rgba(255,255,255,0) 42%),
+    linear-gradient(180deg, var(--flameOuterA), var(--flameOuterB), var(--flameOuterC));
 
-    /* 小さい端末対策 */
-    @media (max-width: 420px){
-      .title{ font-size: 34px; }
-      .menuTitle{ font-size: 38px; }
-      input[type="number"]{ font-size: 38px; }
-      .banner{ height: 128px; }
-    }
-  </style>
-</head>
+  /* 外側は回転しない（ダイヤ化防止） */
+  transform: none;
+
+  animation: flameOuter 1.25s ease-in-out infinite;
+}
+
+/* 内側：ここだけ揺らす（炎っぽい動き担当） */
+.flame .inner{
+  position:absolute;
+  left: 30px;
+  top: 42px;
+  width: 60px;
+  height: 92px;
+
+  border-radius: 50% 50% 62% 62% / 62% 62% 38% 38%;
+
+  background:
+    radial-gradient(circle at 50% 72%, rgba(255,255,255,.60), rgba(255,255,255,0) 56%),
+    linear-gradient(180deg, var(--flameInnerA), var(--flameInnerB), var(--flameInnerC));
+
+  transform-origin: 50% 85%;
+  animation: flameInner 1.05s ease-in-out infinite;
+}
+
+/* コア：さらに小さくフワッと */
+.flame .core{
+  position:absolute;
+  left: 44px;
+  top: 66px;
+  width: 32px;
+  height: 48px;
+
+  border-radius: 50% 50% 62% 62% / 62% 62% 38% 38%;
+  background: linear-gradient(180deg, #ffffff, #fff1c6);
+
+  opacity:.95;
+  transform-origin: 50% 85%;
+  animation: flameCore .9s ease-in-out infinite;
+}
+
+/* 形は固定しつつ “呼吸” だけさせる（外枠は回転しない） */
+@keyframes flameOuter{
+  0%,100%{ transform: translateY(0) scale(1); filter: saturate(1); }
+  50%    { transform: translateY(-3px) scale(1.02); filter: saturate(1.08); }
+}
+
+/* 内側は少しだけ左右に揺らす（ここが炎感） */
+@keyframes flameInner{
+  0%,100%{ transform: translateY(0) rotate(-2deg) scale(1); opacity:.95; }
+  50%    { transform: translateY(-7px) rotate(2deg)  scale(1.04); opacity:1; }
+}
+
+@keyframes flameCore{
+  0%,100%{ transform: translateY(0) scale(1); }
+  50%    { transform: translateY(-4px) scale(1.08); }
+}
+
+/* ✅ 画面表示時の「着火→ボワン」 */
+.flame.is-ignite{
+  animation: ignitePop 520ms cubic-bezier(.2,.95,.2,1) both;
+}
+
+@keyframes ignitePop{
+  0%   { transform: translateY(14px) scale(.84); filter: blur(2px); opacity:0; }
+  45%  { transform: translateY(-22px) scale(1.14); filter: blur(0px); opacity:1; }
+  70%  { transform: translateY(6px)  scale(.98); }
+  100% { transform: translateY(0)    scale(1); }
+}
+
+.flame.is-ignite .outer{
+  box-shadow: 0 0 62px var(--flameGlow);
+}
+
+/* 数字・ラベル（あなたの変数のまま） */
+.streakNum{
+  font-size: 86px;
+  font-weight: 1000;
+  line-height: 1;
+  margin: 0;
+  background: linear-gradient(180deg, var(--flameNumA), var(--flameNumB));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 18px 38px rgba(255,110,60,.22);
+  transform: translateY(6px);
+}
+
+.streakLabel{
+  font-weight: 950;
+  color: var(--flameLabel);
+  letter-spacing:.02em;
+  margin-top:-6px;
+}
+
+.streakBtns{
+  width: min(520px, 100%);
+  display:grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+/* 小さい端末対策 */
+@media (max-width: 420px){
+  .title{ font-size: 34px; }
+  .menuTitle{ font-size: 38px; }
+  input[type="number"]{ font-size: 38px; }
+  .banner{ height: 128px; }
+}
 
 <body>
   <div class="app">

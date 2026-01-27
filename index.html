@@ -179,11 +179,13 @@
 }
 .banner{
   width: 100%;
-  height: 140px;         /* ← ここが基準高さ */
-  object-fit: contain;  /* ← 文字切れ防止 */
+  height: 140px;
   display: block;
   border-radius: 16px;
-  background: transparent;
+
+  object-fit: contain !important;   /* ← 切れない */
+  object-position: center !important;
+  background: rgba(255,255,255,.30);
 }
     .inputs{
       display:grid;

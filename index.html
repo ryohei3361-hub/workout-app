@@ -24,6 +24,21 @@
 
       --cta1:#ffb45a; --cta2:#ff7a45;
       --ctaB1:#6aa9ff;--ctaB2:#2f6bff;
+
+      /* =========================
+         🔥 炎の色（デフォルト＝ノーマル/オレンジ）
+         ※ 7の倍数のときだけJSで上書きします
+         ========================= */
+      --flame-outer-1:#ffd66b;
+      --flame-outer-2:#ff8a2f;
+      --flame-outer-3:#ff4d4d;
+
+      --flame-inner-1:#fff2b0;
+      --flame-inner-2:#ffd06a;
+      --flame-inner-3:#ff7a3a;
+
+      --flame-core-1:#ffffff;
+      --flame-core-2:#fff1c6;
     }
 
     *{box-sizing:border-box}
@@ -389,7 +404,7 @@
       position:absolute; inset:0;
       border-radius: 58% 42% 55% 45% / 60% 60% 40% 40%;
       background: radial-gradient(circle at 45% 60%, rgba(255,255,255,.45), rgba(255,255,255,0) 38%),
-                  linear-gradient(180deg, #ffd66b, #ff8a2f, #ff4d4d);
+                  linear-gradient(180deg, var(--flame-outer-1), var(--flame-outer-2), var(--flame-outer-3));
       animation: flame 1.15s ease-in-out infinite;
     }
     .flame .inner{
@@ -398,7 +413,7 @@
       width: 64px; height: 78px;
       border-radius: 58% 42% 55% 45% / 60% 60% 40% 40%;
       background: radial-gradient(circle at 45% 60%, rgba(255,255,255,.85), rgba(255,255,255,0) 55%),
-                  linear-gradient(180deg, #fff2b0, #ffd06a, #ff7a3a);
+                  linear-gradient(180deg, var(--flame-inner-1), var(--flame-inner-2), var(--flame-inner-3));
       animation: flame2 1.15s ease-in-out infinite;
     }
     .flame .core{
@@ -406,7 +421,7 @@
       left: 44px; top: 56px;
       width: 32px; height: 40px;
       border-radius: 60% 40% 55% 45% / 60% 60% 40% 40%;
-      background: linear-gradient(180deg, #ffffff, #fff1c6);
+      background: linear-gradient(180deg, var(--flame-core-1), var(--flame-core-2));
       opacity:.95;
       animation: pulse .9s ease-in-out infinite;
     }
@@ -767,6 +782,72 @@
       return streak;
     }
 
+    /* =========================================================
+       🔥 追加：7の倍数のときだけ炎色を変える
+       7日=Blue, 14日=Red, 21日=Yellow, 28日=Gold
+       以降は繰り返し（35→Blue…）
+       ※ それ以外の日はノーマル（オレンジ）に戻す
+       ========================================================= */
+    function setFlameColors(outer, inner, core){
+      const r = document.documentElement.style;
+      r.setProperty("--flame-outer-1", outer[0]);
+      r.setProperty("--flame-outer-2", outer[1]);
+      r.setProperty("--flame-outer-3", outer[2]);
+      r.setProperty("--flame-inner-1", inner[0]);
+      r.setProperty("--flame-inner-2", inner[1]);
+      r.setProperty("--flame-inner-3", inner[2]);
+      r.setProperty("--flame-core-1", core[0]);
+      r.setProperty("--flame-core-2", core[1]);
+    }
+
+    function applyFlameThemeForStreak(streak){
+      // ノーマル（オレンジ）
+      const NORMAL = {
+        outer:["#ffd66b","#ff8a2f","#ff4d4d"],
+        inner:["#fff2b0","#ffd06a","#ff7a3a"],
+        core:["#ffffff","#fff1c6"]
+      };
+
+      // 7の倍数以外はノーマル
+      if(!streak || streak % 7 !== 0){
+        setFlameColors(NORMAL.outer, NORMAL.inner, NORMAL.core);
+        return;
+      }
+
+      // 7,14,21,28... を 0..3 に回す（繰り返し）
+      const idx = (Math.floor(streak / 7) - 1) % 4;
+
+      const THEMES = [
+        // 7日：Blue
+        {
+          outer:["#bfe7ff","#4aa3ff","#2f6bff"],
+          inner:["#e8f6ff","#9ad6ff","#4aa3ff"],
+          core:["#ffffff","#d7eeff"]
+        },
+        // 14日：Red（ノーマルより“赤寄り”に）
+        {
+          outer:["#ffb3b3","#ff5a5a","#ff2d2d"],
+          inner:["#ffe0e0","#ff9a9a","#ff5a5a"],
+          core:["#ffffff","#ffe6e6"]
+        },
+        // 21日：Yellow
+        {
+          outer:["#fff5b3","#ffd76a","#ffb800"],
+          inner:["#fff9cf","#ffe59a","#ffd76a"],
+          core:["#ffffff","#fff6d2"]
+        },
+        // 28日：Gold（よりご褒美感）
+        {
+          outer:["#fff2b0","#ffd24a","#ff9f1a"],
+          inner:["#fff9d6","#ffe08a","#ffd24a"],
+          core:["#ffffff","#fff3c4"]
+        }
+      ];
+
+      const t = THEMES[idx];
+      setFlameColors(t.outer, t.inner, t.core);
+    }
+
     // ====== History ======
     function renderHistory(){
       const logs = loadLogs();
@@ -863,6 +944,9 @@
       const streak = computeStreak();
       streakNumEl.textContent = streak;
 
+      // 🔥 追加：7の倍数だけ色変更
+      applyFlameThemeForStreak(streak);
+
       // 入力は残してOK（触りたいとのことなので）、でも次の入力がしやすいように任意で選択状態に
       stepsInput.select?.();
       showScreen("streak");
@@ -923,6 +1007,10 @@
       }else{
         lastLine.textContent = "記録: まだなし";
       }
+
+      // 🔥 追加：ページを開いた時点でも「現在の継続日数」に応じて炎色を整える
+      // （7の倍数以外はノーマルに戻る）
+      applyFlameThemeForStreak(computeStreak());
     })();
   </script>
 </body>

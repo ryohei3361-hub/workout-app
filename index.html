@@ -25,20 +25,17 @@
       --cta1:#ffb45a; --cta2:#ff7a45;
       --ctaB1:#6aa9ff;--ctaB2:#2f6bff;
 
-      /* =========================
-         🔥 炎の色（デフォルト＝ノーマル/オレンジ）
-         ※ 7の倍数のときだけJSで上書きします
-         ========================= */
-      --flame-outer-1:#ffd66b;
-      --flame-outer-2:#ff8a2f;
-      --flame-outer-3:#ff4d4d;
-
-      --flame-inner-1:#fff2b0;
-      --flame-inner-2:#ffd06a;
-      --flame-inner-3:#ff7a3a;
-
-      --flame-core-1:#ffffff;
-      --flame-core-2:#fff1c6;
+      /* 炎テーマ（通常） */
+      --flameA:#ffd66b;
+      --flameB:#ff8a2f;
+      --flameC:#ff4d4d;
+      --flameInnerA:#fff2b0;
+      --flameInnerB:#ffd06a;
+      --flameInnerC:#ff7a3a;
+      --flameGlow: rgba(255,140,60,.35);
+      --flameNumA:#ff9b3a;
+      --flameNumB:#ff4d4d;
+      --flameLabel:#ff7a45;
     }
 
     *{box-sizing:border-box}
@@ -48,15 +45,16 @@
       color:var(--ink);
       min-height:100vh;
       background: #eef4ff;
-      /* ✅ 背景画像（キラキラはこの上に重ねる） */
-      background-image: url("assets/bg.png");
+
+      /* ✅ 背景画像（指定名に合わせる） */
+      background-image: url("assets/background.png");
       background-size: cover;
       background-repeat: no-repeat;
       background-attachment: fixed;
       background-position: center top;
     }
 
-    /* ✨ ふわキラ重ね（背景が地味な時の保険） */
+    /* ✨ ふわキラ重ね（不要ならOFF：opacityを0に） */
     body::before{
       content:"";
       position:fixed; inset:0;
@@ -70,7 +68,7 @@
         radial-gradient(1.2px 1.2px at 18% 72%, rgba(255,255,255,.7), rgba(255,255,255,0) 62%),
         radial-gradient(1.7px 1.7px at 52% 76%, rgba(255,255,255,.65), rgba(255,255,255,0) 62%),
         radial-gradient(1.2px 1.2px at 86% 78%, rgba(255,255,255,.7), rgba(255,255,255,0) 62%);
-      opacity:.55;
+      opacity:0; /* ← キラキラ不要なら 0 のまま */
       filter: blur(.2px);
       animation: twinkle 6s ease-in-out infinite;
     }
@@ -118,7 +116,6 @@
       transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
     }
     .mood:active{ transform: scale(.98); }
-
     .mood .ico{ font-size: 18px; opacity:.9 }
     .mood.selected{
       color:#111827;
@@ -176,16 +173,17 @@
       background: rgba(255,255,255,.55);
       border: 1px solid rgba(255,255,255,.65);
       border-radius: 20px;
-      padding: 14px;
+      padding: 0; /* ✅ ピッタリに */
+      overflow: hidden; /* ✅ 角丸に合わせて切る */
       box-shadow: 0 10px 20px rgba(15,23,42,.08);
     }
     .banner{
       width: 100%;
-      height: 140px;          /* ✅ “枠が広い”対策：固定高さ */
-      object-fit: contain;    /* ✅ 画像は潰さず中に収める */
+      height: 140px;
+      object-fit: cover; /* ✅ 枠にピッタリ */
       display:block;
-      border-radius: 16px;
-      background: rgba(255,255,255,.30);
+      border-radius: 0;
+      background: rgba(255,255,255,.10);
     }
 
     .inputs{
@@ -201,15 +199,31 @@
       padding: 14px 14px 12px;
       box-shadow: 0 10px 20px rgba(15,23,42,.08);
     }
+
     .label{
       display:flex;
-      align-items:center;
+      align-items:flex-start;
       gap:10px;
       font-weight: 900;
       color: #334155;
       margin-bottom: 10px;
     }
-    .label .miniIco{ font-size: 18px; opacity:.9 }
+    .label .miniIco{ font-size: 18px; opacity:.9; line-height:1.2; margin-top:1px; }
+
+    /* ✅ ラベルを「1行目/2行目」に */
+    .labelText{
+      display:flex;
+      flex-direction:column;
+      line-height: 1.05;
+    }
+    .labelMain{ font-weight: 950; }
+    .labelSub{
+      font-weight: 900;
+      color:#64748b;
+      font-size: 13px;
+      margin-top: 4px;
+    }
+
     .numRow{
       display:flex;
       align-items: baseline;
@@ -395,53 +409,71 @@
       padding: 24px 10px;
       min-height: calc(100vh - 160px);
     }
+
+    /* ✅ 炎を “卵” っぽくしない：先端を尖らせる形へ */
     .flame{
-      width: 120px; height: 140px;
+      width: 120px; height: 150px;
       position: relative;
       filter: drop-shadow(0 18px 28px rgba(0,0,0,.15));
+      transform-origin: 50% 80%;
     }
     .flame .outer{
-  position:absolute; inset:0;
-  /* 🔥 炎っぽく：上を尖らせて下をふくらませる */
-  border-radius: 62% 38% 55% 45% / 72% 72% 28% 28%;
-  background: radial-gradient(circle at 45% 60%, rgba(255,255,255,.45), rgba(255,255,255,0) 38%),
-              linear-gradient(180deg, var(--flame-outer-1), var(--flame-outer-2), var(--flame-outer-3));
-  animation: flame 1.05s ease-in-out infinite;
-  transform-origin: 50% 85%;
-}
+      position:absolute; inset:0;
+      /* 下は丸め、上は尖らせる */
+      border-radius: 70% 30% 62% 38% / 55% 55% 45% 45%;
+      transform: rotate(-12deg);
+      background:
+        radial-gradient(circle at 50% 72%, rgba(255,255,255,.35), rgba(255,255,255,0) 40%),
+        linear-gradient(180deg, var(--flameA), var(--flameB), var(--flameC));
+      animation: flame 1.15s ease-in-out infinite;
+    }
+    .flame .inner{
+      position:absolute;
+      left: 26px; top: 34px;
+      width: 70px; height: 88px;
+      border-radius: 72% 28% 64% 36% / 54% 56% 44% 46%;
+      transform: rotate(10deg);
+      background:
+        radial-gradient(circle at 50% 70%, rgba(255,255,255,.65), rgba(255,255,255,0) 55%),
+        linear-gradient(180deg, var(--flameInnerA), var(--flameInnerB), var(--flameInnerC));
+      animation: flame2 1.15s ease-in-out infinite;
+    }
+    .flame .core{
+      position:absolute;
+      left: 46px; top: 60px;
+      width: 34px; height: 46px;
+      border-radius: 70% 30% 64% 36% / 58% 58% 42% 42%;
+      transform: rotate(-6deg);
+      background: linear-gradient(180deg, #ffffff, #fff1c6);
+      opacity:.95;
+      animation: pulse .9s ease-in-out infinite;
+    }
 
-.flame .inner{
-  position:absolute;
-  left: 30px; top: 30px;
-  width: 60px; height: 84px;
-  border-radius: 62% 38% 55% 45% / 74% 74% 26% 26%;
-  background: radial-gradient(circle at 45% 60%, rgba(255,255,255,.85), rgba(255,255,255,0) 55%),
-              linear-gradient(180deg, var(--flame-inner-1), var(--flame-inner-2), var(--flame-inner-3));
-  animation: flame2 1.05s ease-in-out infinite;
-  transform-origin: 50% 85%;
-}
-
-.flame .core{
-  position:absolute;
-  left: 46px; top: 54px;
-  width: 28px; height: 44px;
-  border-radius: 60% 40% 55% 45% / 76% 76% 24% 24%;
-  background: linear-gradient(180deg, var(--flame-core-1), var(--flame-core-2));
-  opacity:.95;
-  animation: pulse .85s ease-in-out infinite;
-  transform-origin: 50% 85%;
-}
-   @keyframes flame{
-  0%,100%{ transform: translateY(0) rotate(-2deg) scaleX(.98) scaleY(1.02); }
-  50%{ transform: translateY(-8px) rotate(2deg) scaleX(1.02) scaleY(.98); }
-}
-@keyframes flame2{
-  0%,100%{ transform: translateY(0) rotate(2deg) scaleX(1.00) scaleY(1.02); opacity:.95;}
-  50%{ transform: translateY(-6px) rotate(-2deg) scaleX(1.03) scaleY(.98); opacity:1;}
-}
+    @keyframes flame{
+      0%,100%{ transform: translateY(0) rotate(-12deg) scale(1); }
+      50%{ transform: translateY(-7px) rotate(-10deg) scale(1.03); }
+    }
+    @keyframes flame2{
+      0%,100%{ transform: translateY(0) rotate(10deg) scale(1); opacity:.95;}
+      50%{ transform: translateY(-5px) rotate(8deg) scale(1.03); opacity:1;}
+    }
     @keyframes pulse{
       0%,100%{ transform: scale(1); }
-      50%{ transform: scale(1.06); }
+      50%{ transform: scale(1.08); }
+    }
+
+    /* ✅ 画面表示時の「着火→ボワン」 */
+    .flame.is-ignite{
+      animation: ignitePop 520ms cubic-bezier(.2,.95,.2,1) both;
+    }
+    @keyframes ignitePop{
+      0%   { transform: translateY(12px) scale(.84); filter: blur(2px); opacity:0; }
+      45%  { transform: translateY(-20px) scale(1.12); filter: blur(0px); opacity:1; }
+      70%  { transform: translateY(5px)  scale(.98); }
+      100% { transform: translateY(0)    scale(1); }
+    }
+    .flame.is-ignite .outer{
+      box-shadow: 0 0 62px var(--flameGlow);
     }
 
     .streakNum{
@@ -449,7 +481,7 @@
       font-weight: 1000;
       line-height: 1;
       margin: 0;
-      background: linear-gradient(180deg, #ff9b3a, #ff4d4d);
+      background: linear-gradient(180deg, var(--flameNumA), var(--flameNumB));
       -webkit-background-clip: text;
       background-clip: text;
       color: transparent;
@@ -458,7 +490,7 @@
     }
     .streakLabel{
       font-weight: 950;
-      color:#ff7a45;
+      color: var(--flameLabel);
       letter-spacing:.02em;
       margin-top:-6px;
     }
@@ -505,7 +537,13 @@
 
         <div class="inputs">
           <div class="field">
-            <div class="label"><span class="miniIco">👟</span>今日の歩数（空欄NG）</div>
+            <div class="label">
+              <span class="miniIco">👟</span>
+              <span class="labelText">
+                <span class="labelMain">今日の歩数</span>
+                <span class="labelSub">（空欄NG）</span>
+              </span>
+            </div>
             <div class="numRow">
               <input id="stepsInput" type="number" inputmode="numeric" placeholder="" />
               <span class="unit">歩</span>
@@ -513,7 +551,13 @@
           </div>
 
           <div class="field">
-            <div class="label"><span class="miniIco">🕒</span>運動（空欄NG）</div>
+            <div class="label">
+              <span class="miniIco">🕒</span>
+              <span class="labelText">
+                <span class="labelMain">運動</span>
+                <span class="labelSub">（空欄NG）</span>
+              </span>
+            </div>
             <div class="numRow">
               <input id="minsInput" type="number" inputmode="numeric" placeholder="" />
               <span class="unit">分</span>
@@ -552,7 +596,7 @@
     <!-- STREAK -->
     <section id="screenStreak" class="screen">
       <div class="streakWrap">
-        <div class="flame" aria-hidden="true">
+        <div class="flame" id="flame" aria-hidden="true">
           <div class="outer"></div>
           <div class="inner"></div>
           <div class="core"></div>
@@ -596,12 +640,12 @@
       futsu: {
         label: "ふつう",
         ico: "💙",
-        fixed: { name: "Ring Fit（ウォーキングモード） + YouTube 1本", img: "assets/ringfit.png" }
+        fixed: { name: "Fit Boxing", img: "assets/fitboxing.png" } // ← 指定に合わせて
       },
       shindoi: {
         label: "しんどい",
         ico: "🙂‍↕️",
-        fixed: { name: "YouTube ヨガ 1本 + 寝る前 Stretch 1本", img: "assets/yoga.png" }
+        fixed: { name: "YOGA", img: "assets/yoga.png" }
       },
       rest: {
         label: "休息",
@@ -667,6 +711,95 @@
       localStorage.setItem(STATE_KEY, JSON.stringify(s));
     }
 
+    // ====== Flame theme (7の倍数だけ色チェンジ) ======
+    function setFlameThemeForStreak(streak){
+      // 基本はノーマル。7の倍数だけ変える（7,14,21,28...）
+      const root = document.documentElement.style;
+
+      const isMultiple7 = streak > 0 && (streak % 7 === 0);
+      if(!isMultiple7){
+        // normal
+        root.setProperty("--flameA", "#ffd66b");
+        root.setProperty("--flameB", "#ff8a2f");
+        root.setProperty("--flameC", "#ff4d4d");
+        root.setProperty("--flameInnerA", "#fff2b0");
+        root.setProperty("--flameInnerB", "#ffd06a");
+        root.setProperty("--flameInnerC", "#ff7a3a");
+        root.setProperty("--flameGlow", "rgba(255,140,60,.35)");
+        root.setProperty("--flameNumA", "#ff9b3a");
+        root.setProperty("--flameNumB", "#ff4d4d");
+        root.setProperty("--flameLabel", "#ff7a45");
+        return;
+      }
+
+      // 7=Blue, 14=Red, 21=Yellow, 28=Gold → 繰り返し
+      const phase = (Math.floor(streak / 7) - 1) % 4; // 0..3
+      if(phase === 0){
+        // Blue
+        root.setProperty("--flameA", "#b8e7ff");
+        root.setProperty("--flameB", "#3aa7ff");
+        root.setProperty("--flameC", "#2f6bff");
+        root.setProperty("--flameInnerA", "#e8f7ff");
+        root.setProperty("--flameInnerB", "#9edcff");
+        root.setProperty("--flameInnerC", "#3aa7ff");
+        root.setProperty("--flameGlow", "rgba(58,167,255,.40)");
+        root.setProperty("--flameNumA", "#3aa7ff");
+        root.setProperty("--flameNumB", "#2f6bff");
+        root.setProperty("--flameLabel", "#2f6bff");
+      }else if(phase === 1){
+        // Red
+        root.setProperty("--flameA", "#ffd1d1");
+        root.setProperty("--flameB", "#ff4d4d");
+        root.setProperty("--flameC", "#d81b60");
+        root.setProperty("--flameInnerA", "#ffecec");
+        root.setProperty("--flameInnerB", "#ff9a9a");
+        root.setProperty("--flameInnerC", "#ff4d4d");
+        root.setProperty("--flameGlow", "rgba(255,77,77,.40)");
+        root.setProperty("--flameNumA", "#ff4d4d");
+        root.setProperty("--flameNumB", "#d81b60");
+        root.setProperty("--flameLabel", "#d81b60");
+      }else if(phase === 2){
+        // Yellow
+        root.setProperty("--flameA", "#fff7b3");
+        root.setProperty("--flameB", "#ffd400");
+        root.setProperty("--flameC", "#ff9b3a");
+        root.setProperty("--flameInnerA", "#fffbe0");
+        root.setProperty("--flameInnerB", "#ffe27a");
+        root.setProperty("--flameInnerC", "#ffd400");
+        root.setProperty("--flameGlow", "rgba(255,212,0,.40)");
+        root.setProperty("--flameNumA", "#ffd400");
+        root.setProperty("--flameNumB", "#ff9b3a");
+        root.setProperty("--flameLabel", "#c28b00");
+      }else{
+        // Gold
+        root.setProperty("--flameA", "#fff1a6");
+        root.setProperty("--flameB", "#ffcf4a");
+        root.setProperty("--flameC", "#ff8a2f");
+        root.setProperty("--flameInnerA", "#fff7cc");
+        root.setProperty("--flameInnerB", "#ffe27a");
+        root.setProperty("--flameInnerC", "#ffcf4a");
+        root.setProperty("--flameGlow", "rgba(255,207,74,.42)");
+        root.setProperty("--flameNumA", "#ffcf4a");
+        root.setProperty("--flameNumB", "#ff8a2f");
+        root.setProperty("--flameLabel", "#c98a00");
+      }
+    }
+
+    // ✅ 着火→ボワン + バイブ（対応端末のみ）
+    function igniteFlameAndVibrate(){
+      const flame = document.getElementById("flame");
+      if(flame){
+        flame.classList.remove("is-ignite");
+        void flame.offsetWidth; // reflowでリセット
+        flame.classList.add("is-ignite");
+        setTimeout(()=> flame.classList.remove("is-ignite"), 650);
+      }
+
+      if (navigator.vibrate) {
+        navigator.vibrate([25, 40, 25]);
+      }
+    }
+
     function showScreen(name){
       screenHome.classList.remove("active");
       screenHistory.classList.remove("active");
@@ -684,6 +817,7 @@
         renderHistory();
       }else if(name==="streak"){
         screenStreak.classList.add("active");
+        // ※ streak表示時のアニメは、btnDone側で streak計算→テーマ反映してから呼ぶ
       }
       window.scrollTo({top:0, behavior:"instant"});
     }
@@ -693,7 +827,7 @@
       const st = loadState();
       const t = todayKey();
 
-      // 同じ日に同じmoodなら、元気のランダム結果は固定（再抽選なし）
+      // 同じ日に同じmoodなら、元気のランダム結果は固定
       if(st.date === t && st.mood === mood && st.menuName && st.menuImg){
         return { name: st.menuName, img: st.menuImg };
       }
@@ -702,7 +836,6 @@
       let chosen;
 
       if(conf.random){
-        // 初回だけランダム
         chosen = conf.random[Math.floor(Math.random()*conf.random.length)];
       }else{
         chosen = conf.fixed;
@@ -719,21 +852,17 @@
     }
 
     function applyMood(mood){
-      // タブ見た目
       [...moodTabs.querySelectorAll(".mood")].forEach(btn=>{
         btn.classList.toggle("selected", btn.dataset.mood===mood);
       });
 
-      // チップ
       const conf = MENUS[mood];
       moodChip.innerHTML = `<span class="ico">${conf.ico}</span><span>${conf.label}</span>`;
 
-      // メニュー
       const chosen = decideMenuForMood(mood);
       menuTitle.textContent = chosen.name;
       menuImg.src = chosen.img;
 
-      // エラー消す
       err.classList.remove("show");
     }
 
@@ -742,7 +871,6 @@
       return v === null || v === undefined || String(v).trim() === "";
     }
     function validateInputs(){
-      // 空欄NG（0はOKだが入力は必要）
       if(isBlank(stepsInput.value) || isBlank(minsInput.value)){
         err.classList.add("show");
         return false;
@@ -770,12 +898,10 @@
 
     function computeStreak(){
       const logs = loadLogs();
-
-      // 日付ごとに「その日に1回でも記録があるか」をセット化
       const days = new Set(logs.map(x => x.date));
 
       let streak = 0;
-      let d = new Date(); // 今日から遡る
+      let d = new Date();
       while(true){
         const key = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
         if(days.has(key)){
@@ -786,72 +912,6 @@
         }
       }
       return streak;
-    }
-
-    /* =========================================================
-       🔥 追加：7の倍数のときだけ炎色を変える
-       7日=Blue, 14日=Red, 21日=Yellow, 28日=Gold
-       以降は繰り返し（35→Blue…）
-       ※ それ以外の日はノーマル（オレンジ）に戻す
-       ========================================================= */
-    function setFlameColors(outer, inner, core){
-      const r = document.documentElement.style;
-      r.setProperty("--flame-outer-1", outer[0]);
-      r.setProperty("--flame-outer-2", outer[1]);
-      r.setProperty("--flame-outer-3", outer[2]);
-      r.setProperty("--flame-inner-1", inner[0]);
-      r.setProperty("--flame-inner-2", inner[1]);
-      r.setProperty("--flame-inner-3", inner[2]);
-      r.setProperty("--flame-core-1", core[0]);
-      r.setProperty("--flame-core-2", core[1]);
-    }
-
-    function applyFlameThemeForStreak(streak){
-      // ノーマル（オレンジ）
-      const NORMAL = {
-        outer:["#ffd66b","#ff8a2f","#ff4d4d"],
-        inner:["#fff2b0","#ffd06a","#ff7a3a"],
-        core:["#ffffff","#fff1c6"]
-      };
-
-      // 7の倍数以外はノーマル
-      if(!streak || streak % 7 !== 0){
-        setFlameColors(NORMAL.outer, NORMAL.inner, NORMAL.core);
-        return;
-      }
-
-      // 7,14,21,28... を 0..3 に回す（繰り返し）
-      const idx = (Math.floor(streak / 7) - 1) % 4;
-
-      const THEMES = [
-        // 7日：Blue
-        {
-          outer:["#bfe7ff","#4aa3ff","#2f6bff"],
-          inner:["#e8f6ff","#9ad6ff","#4aa3ff"],
-          core:["#ffffff","#d7eeff"]
-        },
-        // 14日：Red（ノーマルより“赤寄り”に）
-        {
-          outer:["#ffb3b3","#ff5a5a","#ff2d2d"],
-          inner:["#ffe0e0","#ff9a9a","#ff5a5a"],
-          core:["#ffffff","#ffe6e6"]
-        },
-        // 21日：Yellow
-        {
-          outer:["#fff5b3","#ffd76a","#ffb800"],
-          inner:["#fff9cf","#ffe59a","#ffd76a"],
-          core:["#ffffff","#fff6d2"]
-        },
-        // 28日：Gold（よりご褒美感）
-        {
-          outer:["#fff2b0","#ffd24a","#ff9f1a"],
-          inner:["#fff9d6","#ffe08a","#ffd24a"],
-          core:["#ffffff","#fff3c4"]
-        }
-      ];
-
-      const t = THEMES[idx];
-      setFlameColors(t.outer, t.inner, t.core);
     }
 
     // ====== History ======
@@ -946,20 +1006,23 @@
         mins: minsInput.value
       });
 
-      // 継続日数計算して表示（休息も含まれる：ログがあればOK）
+      // ✅ 継続日数を計算
       const streak = computeStreak();
       streakNumEl.textContent = streak;
 
-      // 🔥 追加：7の倍数だけ色変更
-      applyFlameThemeForStreak(streak);
+      // ✅ 7の倍数だけ色チェンジ
+      setFlameThemeForStreak(streak);
 
-      // 入力は残してOK（触りたいとのことなので）、でも次の入力がしやすいように任意で選択状態に
-      stepsInput.select?.();
+      // ✅ ストリーク画面へ
       showScreen("streak");
+
+      // ✅ 着火→ボワン +（対応端末のみ）バイブ
+      igniteFlameAndVibrate();
+
+      stepsInput.select?.();
     });
 
     btnMore.addEventListener("click", ()=>{
-      // もう1つやる：継続画面に行かず、そのまま記録を足してホームに残る
       if(!validateInputs()) return;
 
       const st = loadState();
@@ -973,13 +1036,11 @@
         mins: minsInput.value
       });
 
-      // 入力をすぐ次に打てるように少し整える（0固定ではなく、空にして「空欄NG」なので必ず入力）
       stepsInput.value = "";
       minsInput.value = "";
       err.classList.remove("show");
       stepsInput.focus();
 
-      // ちょい通知
       lastLine.textContent = `記録: ${todayKey()} ${nowTime()} / 追加で記録したよ`;
     });
 
@@ -1000,12 +1061,10 @@
 
     // ====== Init ======
     (function init(){
-      // 初期状態：元気
       const st = loadState();
       const mood = st.mood || "genki";
       applyMood(mood);
 
-      // 最終ログ表示
       const logs = loadLogs();
       if(logs.length){
         const x = logs[0];
@@ -1014,9 +1073,8 @@
         lastLine.textContent = "記録: まだなし";
       }
 
-      // 🔥 追加：ページを開いた時点でも「現在の継続日数」に応じて炎色を整える
-      // （7の倍数以外はノーマルに戻る）
-      applyFlameThemeForStreak(computeStreak());
+      // 初期テーマ（通常）
+      setFlameThemeForStreak(computeStreak());
     })();
   </script>
 </body>

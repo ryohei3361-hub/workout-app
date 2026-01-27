@@ -170,21 +170,23 @@
       letter-spacing: .01em;
       text-shadow: 0 8px 22px rgba(15,23,42,.12);
     }
+.bannerBox{
+  background: rgba(255,255,255,.55);
+  border: 1px solid rgba(255,255,255,.65);
+  border-radius: 20px;
+  padding: 0;              /* ← 14px を 0 に */
+  overflow: hidden;        /* ← はみ出しを切る */
+  box-shadow: 0 10px 20px rgba(15,23,42,.08);
+}
 
-    .bannerBox{
-      background: rgba(255,255,255,.55);
-      border: 1px solid rgba(255,255,255,.65);
-      border-radius: 20px;
-      padding: 0; /* ✅ ピッタリに */
-      overflow: hidden; /* ✅ 角丸に合わせて切る */
-      box-shadow: 0 10px 20px rgba(15,23,42,.08);
-    }
-    .banner{
+.banner{
   width: 100%;
-  height: 170px;
-  object-fit: contain;
-  border-radius: 16px;
-  background: rgba(255,255,255,.30);
+  height: 170px;           /* ← 好みで 160〜180 */
+  object-fit: cover;       /* ← ピッタリの肝 */
+  object-position: center; /* ← 中央基準 */
+  display:block;
+  border-radius: 0;        /* ← 外側で丸めるので0 */
+  background: transparent; /* ← 余計な背景を消す */
 }
     .inputs{
       display:grid;

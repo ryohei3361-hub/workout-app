@@ -174,19 +174,16 @@
   background: rgba(255,255,255,.55);
   border: 1px solid rgba(255,255,255,.65);
   border-radius: 20px;
-  padding: 0;              /* ← 14px を 0 に */
-  overflow: hidden;        /* ← はみ出しを切る */
+  padding: 8px;          /* ← 0にしない！8pxで固定 */
   box-shadow: 0 10px 20px rgba(15,23,42,.08);
 }
-
 .banner{
   width: 100%;
-  height: 170px;           /* ← 好みで 160〜180 */
-  object-fit: cover;       /* ← ピッタリの肝 */
-  object-position: center; /* ← 中央基準 */
-  display:block;
-  border-radius: 0;        /* ← 外側で丸めるので0 */
-  background: transparent; /* ← 余計な背景を消す */
+  height: 140px;         /* ← ここが基準高さ */
+  object-fit: contain;  /* ← 文字切れ防止 */
+  display: block;
+  border-radius: 16px;
+  background: transparent;
 }
     .inputs{
       display:grid;

@@ -231,17 +231,21 @@
       gap: 10px;
     }
     input[type="number"]{
-      width: 100%;
-      font-size: 42px;
-      font-weight: 950;
-      border: none;
-      outline: none;
-      background: transparent;
-      color: #0f172a;
-      padding: 0;
-      -webkit-appearance: none;
-      appearance: textfield;
-    }
+  width: 100%;
+  min-width: 0;                 /* ✅ これ重要：狭い時に縮められる */
+  font-size: clamp(34px, 7vw, 42px); /* ✅ 小画面は小さく、大画面は今の42pxへ */
+  font-weight: 950;
+  line-height: 1;
+  letter-spacing: -0.02em;      /* ✅ 5桁がギリギリの時に少し助ける */
+  font-variant-numeric: tabular-nums; /* ✅ 数字幅を揃えて見栄えUP（対応環境で） */
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #0f172a;
+  padding: 0;
+  -webkit-appearance: none;
+  appearance: textfield;
+}
     .unit{
       color: #64748b;
       font-weight: 900;

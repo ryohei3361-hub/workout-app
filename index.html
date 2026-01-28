@@ -225,40 +225,47 @@
       font-size: 13px;
       margin-top: 4px;
     }
+.numRow{
+  display:flex;
+  align-items:center;        /* ← baselineやめる（iPhoneで崩れやすい） */
+  justify-content: space-between;
+  gap: 10px;
+}
 
-    .numRow{
-      display:flex;
-      align-items: baseline;
-      justify-content: space-between;
-      gap: 10px;
-    }
+input[type="number"]{
+  flex: 1 1 auto;
+  width: 100%;              /* ← autoやめる（消える原因になりがち） */
+  min-width: 0;
+  font-size: 42px;
+  font-weight: 950;
+  line-height: 1.15;        /* ← 1だと潰れることがある */
+  letter-spacing: -0.03em;  /* ← 5桁でも入りやすく */
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #0f172a;
+  padding: 0;
+  margin: 0;
 
-    /* ✅ 5桁でも入りやすくする（歩数/運動 共通） */
-    input[type="number"]{
-      flex: 1 1 auto;      /* ← これがないと幅が詰まって4桁っぽくなることがある */
-      min-width: 0;        /* ← はみ出し防止 */
-      width: auto;         /* ← width:100% をやめる */
-      font-size: 40px;     /* 少し調整（5桁対策） */
-      font-weight: 950;
-      line-height: 1;
-      letter-spacing: -0.03em; /* 5桁でも収まりやすく */
-      border: none;
-      outline: none;
-      background: transparent;
-      color: #0f172a;
-      padding: 0;
-      -webkit-appearance: none;
-      appearance: textfield;
-    }
-    .unit{
-      flex: 0 0 auto;
-      color: #64748b;
-      font-weight: 900;
-      font-size: 18px;   /* 少し小さくして数字の場所を確保 */
-      white-space: nowrap;
-      padding-left: 6px;
-    }
+  -webkit-appearance: none;
+  appearance: textfield;
+}
 
+/* iPhoneの増減ボタンを消して表示安定 */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button{
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.unit{
+  flex: 0 0 auto;
+  color: #64748b;
+  font-weight: 900;
+  font-size: 20px;          /* ← 元の見た目に近く */
+  white-space: nowrap;
+  padding-left: 8px;
+}
     .btns{
       display:grid;
       grid-template-columns: 1fr 1fr;

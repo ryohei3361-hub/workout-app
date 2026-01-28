@@ -90,9 +90,7 @@
       margin: 10px 0 14px;
       text-shadow: 0 6px 18px rgba(15,23,42,.12);
     }
-.menuTitle{
-  word-break: break-word;
-}
+
     /* 上の体調タブ */
     .moods{
       display:grid;
@@ -163,30 +161,31 @@
     .chip .ico{font-size:16px}
 
     .menuTitle{
-      font-size: 30px;
+      font-size: 44px;
       font-weight: 950;
       margin: 6px 0 10px;
       line-height: 1.1;
       letter-spacing: .01em;
       text-shadow: 0 8px 22px rgba(15,23,42,.12);
     }
-.bannerBox{
-  background: rgba(255,255,255,.55);
-  border: 1px solid rgba(255,255,255,.65);
-  border-radius: 20px;
-  padding: 8px;          /* ← 0にしない！8pxで固定 */
-  box-shadow: 0 10px 20px rgba(15,23,42,.08);
-}
-.banner{
-  width: 100%;
-  height: 140px;
-  display: block;
-  border-radius: 16px;
 
-  object-fit: contain !important;   /* ← 切れない */
-  object-position: center !important;
-  background: rgba(255,255,255,.30);
-}
+    .bannerBox{
+      background: rgba(255,255,255,.55);
+      border: 1px solid rgba(255,255,255,.65);
+      border-radius: 20px;
+      padding: 0; /* ✅ ピッタリに */
+      overflow: hidden; /* ✅ 角丸に合わせて切る */
+      box-shadow: 0 10px 20px rgba(15,23,42,.08);
+    }
+    .banner{
+      width: 100%;
+      height: 140px;
+      object-fit: cover; /* ✅ 枠にピッタリ */
+      display:block;
+      border-radius: 0;
+      background: rgba(255,255,255,.10);
+    }
+
     .inputs{
       display:grid;
       grid-template-columns: 1fr 1fr;
@@ -400,7 +399,10 @@
       font-weight: 900;
     }
 
-    /* 継続画面（Duolingo風） */
+    /* =========================================================
+       ✅ ここから炎を「全部書き直し」（ダイア化防止＋着火長め）
+       ========================================================= */
+
     .streakWrap{
       display:flex;
       flex-direction:column;
@@ -411,125 +413,118 @@
       min-height: calc(100vh - 160px);
     }
 
-    /* ✅ 炎を “卵” っぽくしない：先端を尖らせる形
-    .flame {
-  width: 120px;
-  height: 160px;              /* 縦長 */
-  position: relative;
-  transform-origin: 50% 85%;
-}
+    /* ✅ 炎：形を炎っぽく＆着火時に崩れない */
+    .flame{
+      width: 120px;
+      height: 160px;
+      position: relative;
+      filter: drop-shadow(0 18px 28px rgba(0,0,0,.15));
+      transform-origin: 50% 80%;
+    }
 
-/* 外側：ダイア感を消して炎形に寄せる（左右を少し非対称＋先端細め） */
-.flame .outer {
-  position: absolute;
-  inset: 0;
+    /* 外炎 */
+    .flame .outer{
+      position:absolute; inset:0;
+      border-radius: 58% 42% 72% 28% / 70% 70% 30% 30%;
+      background:
+        radial-gradient(circle at 45% 68%, rgba(255,255,255,.28), rgba(255,255,255,0) 42%),
+        linear-gradient(180deg, var(--flameA), var(--flameB), var(--flameC));
+      animation: flameOuter 1.15s ease-in-out infinite;
+      will-change: transform;
+    }
 
-  /* ★ここが肝：左右対称すぎるとダイアっぽく見えやすい */
-  border-radius: 48% 52% 64% 36% / 72% 72% 28% 28%;
+    /* 内炎 */
+    .flame .inner{
+      position:absolute;
+      left: 26px; top: 36px;
+      width: 70px; height: 92px;
+      border-radius: 62% 38% 70% 30% / 72% 68% 32% 28%;
+      background:
+        radial-gradient(circle at 50% 70%, rgba(255,255,255,.60), rgba(255,255,255,0) 56%),
+        linear-gradient(180deg, var(--flameInnerA), var(--flameInnerB), var(--flameInnerC));
+      animation: flameInner 1.15s ease-in-out infinite;
+      will-change: transform;
+    }
 
-  /* もともとの色変数を使う想定（あなたのコード側にある前提） */
-  background:
-    radial-gradient(circle at 48% 62%, rgba(255,255,255,.28), rgba(255,255,255,0) 42%),
-    linear-gradient(180deg, var(--flameOuterA), var(--flameOuterB), var(--flameOuterC));
+    /* 芯 */
+    .flame .core{
+      position:absolute;
+      left: 46px; top: 64px;
+      width: 32px; height: 44px;
+      border-radius: 60% 40% 68% 32% / 70% 70% 30% 30%;
+      background: linear-gradient(180deg, #ffffff, #fff1c6);
+      opacity:.96;
+      animation: flameCore .95s ease-in-out infinite;
+      will-change: transform;
+    }
 
-  transform: none;
-  will-change: transform;
+    /* ゆらぎ */
+    @keyframes flameOuter{
+      0%,100%{ transform: translateY(0) rotate(-6deg) scale(1); }
+      50%{    transform: translateY(-8px) rotate(-4deg) scale(1.035); }
+    }
+    @keyframes flameInner{
+      0%,100%{ transform: translateY(0) rotate(5deg) scale(1); opacity:.95; }
+      50%{    transform: translateY(-6px) rotate(3deg) scale(1.04); opacity:1; }
+    }
+    @keyframes flameCore{
+      0%,100%{ transform: scale(1); }
+      50%{    transform: scale(1.10); }
+    }
 
-  /* 既存の flame アニメ名を変えずに運用したいなら flame を使ってOK */
-  animation: flame 1.25s ease-in-out infinite;
-}
+    /* ✅ 着火：flame本体は動かさず、中身だけボワン（ダイア化防止） */
+    .flame.is-ignite .outer,
+    .flame.is-ignite .inner,
+    .flame.is-ignite .core{
+      animation: ignitePop 900ms cubic-bezier(.2,.95,.2,1) both;
+    }
+    .flame.is-ignite .outer{
+      box-shadow: 0 0 72px var(--flameGlow);
+    }
+    @keyframes ignitePop{
+      0%   { transform: translateY(18px) scale(.80); filter: blur(2px); opacity:0; }
+      35%  { transform: translateY(-26px) scale(1.16); filter: blur(0px); opacity:1; }
+      65%  { transform: translateY(8px)  scale(.98); }
+      100% { transform: translateY(0)    scale(1); }
+    }
 
-.flame .inner{
-  position:absolute;
-  left: 26px; top: 34px;
-  width: 70px; height: 88px;
+    .streakNum{
+      font-size: 86px;
+      font-weight: 1000;
+      line-height: 1;
+      margin: 0;
+      background: linear-gradient(180deg, var(--flameNumA), var(--flameNumB));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 18px 38px rgba(255,110,60,.22);
+      transform: translateY(6px);
+    }
+    .streakLabel{
+      font-weight: 950;
+      color: var(--flameLabel);
+      letter-spacing:.02em;
+      margin-top:-6px;
+    }
 
-  /* 内側も少し炎寄り（丸すぎると卵感が出る） */
-  border-radius: 62% 38% 64% 36% / 64% 66% 34% 36%;
+    .streakBtns{
+      width: min(520px, 100%);
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-top: 12px;
+    }
 
-  transform: rotate(10deg);
-  background:
-    radial-gradient(circle at 50% 70%, rgba(255,255,255,.65), rgba(255,255,255,0) 55%),
-    linear-gradient(180deg, var(--flameInnerA), var(--flameInnerB), var(--flameInnerC));
-  animation: flame2 1.15s ease-in-out infinite;
-}
+    /* 小さい端末対策 */
+    @media (max-width: 420px){
+      .title{ font-size: 34px; }
+      .menuTitle{ font-size: 38px; }
+      input[type="number"]{ font-size: 38px; }
+      .banner{ height: 128px; }
+    }
+  </style>
+</head>
 
-.flame .core{
-  position:absolute;
-  left: 46px; top: 60px;
-  width: 34px; height: 46px;
-
-  border-radius: 68% 32% 62% 38% / 62% 62% 38% 38%;
-  transform: rotate(-6deg);
-
-  background: linear-gradient(180deg, #ffffff, #fff1c6);
-  opacity:.95;
-  animation: pulse .9s ease-in-out infinite;
-}
-
-/* 外側：回転を強くしすぎるとダイア感が出るので控えめに */
-@keyframes flame{
-  0%,100%{ transform: translateY(0) rotate(-6deg) scale(1); }
-  50%{ transform: translateY(-8px) rotate(-4deg) scale(1.03); }
-}
-@keyframes flame2{
-  0%,100%{ transform: translateY(0) rotate(10deg) scale(1); opacity:.95;}
-  50%{ transform: translateY(-6px) rotate(8deg) scale(1.03); opacity:1;}
-}
-@keyframes pulse{
-  0%,100%{ transform: scale(1); }
-  50%{ transform: scale(1.08); }
-}
-
-/* ✅ 画面表示時の「着火→ボワン」：時間を伸ばす（520ms → 850ms） */
-.flame.is-ignite{
-  animation: ignitePop 850ms cubic-bezier(.2,.95,.2,1) both;
-}
-@keyframes ignitePop{
-  0%   { transform: translateY(18px) scale(.78); filter: blur(2px); opacity:0; }
-  35%  { transform: translateY(-28px) scale(1.18); filter: blur(0px); opacity:1; }
-  60%  { transform: translateY(8px)  scale(.98); }
-  78%  { transform: translateY(-2px) scale(1.02); }
-  100% { transform: translateY(0)    scale(1); }
-}
-.flame.is-ignite .outer{
-  box-shadow: 0 0 62px var(--flameGlow);
-}
-
-.streakNum{
-  font-size: 86px;
-  font-weight: 1000;
-  line-height: 1;
-  margin: 0;
-  background: linear-gradient(180deg, var(--flameNumA), var(--flameNumB));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  text-shadow: 0 18px 38px rgba(255,110,60,.22);
-  transform: translateY(6px);
-}
-.streakLabel{
-  font-weight: 950;
-  color: var(--flameLabel);
-  letter-spacing:.02em;
-  margin-top:-6px;
-}
-
-.streakBtns{
-  width: min(520px, 100%);
-  display:grid;
-  grid-template-columns: 1fr;
-  gap: 12px;
-  margin-top: 12px;
-}
-
-/* 小さい端末対策 */
-@media (max-width: 420px){
-  .title{ font-size: 34px; }
-  .menuTitle{ font-size: 38px; }
-  input[type="number"]{ font-size: 38px; }
-  .banner{ height: 128px; }
-}
 <body>
   <div class="app">
 
@@ -657,7 +652,7 @@
       futsu: {
         label: "ふつう",
         ico: "💙",
-        fixed: { name: "Fit Boxing", img: "assets/fitboxing.png" } // ← 指定に合わせて
+        fixed: { name: "Fit Boxing", img: "assets/fitboxing.png" }
       },
       shindoi: {
         label: "しんどい",
@@ -730,12 +725,10 @@
 
     // ====== Flame theme (7の倍数だけ色チェンジ) ======
     function setFlameThemeForStreak(streak){
-      // 基本はノーマル。7の倍数だけ変える（7,14,21,28...）
       const root = document.documentElement.style;
-
       const isMultiple7 = streak > 0 && (streak % 7 === 0);
+
       if(!isMultiple7){
-        // normal
         root.setProperty("--flameA", "#ffd66b");
         root.setProperty("--flameB", "#ff8a2f");
         root.setProperty("--flameC", "#ff4d4d");
@@ -749,7 +742,6 @@
         return;
       }
 
-      // 7=Blue, 14=Red, 21=Yellow, 28=Gold → 繰り返し
       const phase = (Math.floor(streak / 7) - 1) % 4; // 0..3
       if(phase === 0){
         // Blue
@@ -809,7 +801,7 @@
         flame.classList.remove("is-ignite");
         void flame.offsetWidth; // reflowでリセット
         flame.classList.add("is-ignite");
-        setTimeout(()=> flame.classList.remove("is-ignite"), 650);
+        setTimeout(()=> flame.classList.remove("is-ignite"), 950); // ✅ 長めに
       }
 
       if (navigator.vibrate) {
@@ -834,7 +826,6 @@
         renderHistory();
       }else if(name==="streak"){
         screenStreak.classList.add("active");
-        // ※ streak表示時のアニメは、btnDone側で streak計算→テーマ反映してから呼ぶ
       }
       window.scrollTo({top:0, behavior:"instant"});
     }
@@ -844,7 +835,6 @@
       const st = loadState();
       const t = todayKey();
 
-      // 同じ日に同じmoodなら、元気のランダム結果は固定
       if(st.date === t && st.mood === mood && st.menuName && st.menuImg){
         return { name: st.menuName, img: st.menuImg };
       }
@@ -1023,17 +1013,13 @@
         mins: minsInput.value
       });
 
-      // ✅ 継続日数を計算
       const streak = computeStreak();
       streakNumEl.textContent = streak;
 
-      // ✅ 7の倍数だけ色チェンジ
       setFlameThemeForStreak(streak);
 
-      // ✅ ストリーク画面へ
       showScreen("streak");
 
-      // ✅ 着火→ボワン +（対応端末のみ）バイブ
       igniteFlameAndVibrate();
 
       stepsInput.select?.();
@@ -1090,7 +1076,6 @@
         lastLine.textContent = "記録: まだなし";
       }
 
-      // 初期テーマ（通常）
       setFlameThemeForStreak(computeStreak());
     })();
   </script>

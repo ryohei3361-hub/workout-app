@@ -50,8 +50,10 @@
       background-image: url("assets/background.png");
       background-size: cover;
       background-repeat: no-repeat;
-      background-attachment: fixed;
       background-position: center top;
+
+      /* ✅ iPhoneでbackground-attachment:fixedが暴れて拡大ズレすることがあるのでOFF */
+      background-attachment: scroll;
     }
 
     /* ✨ ふわキラ重ね（不要ならOFF：opacityを0に） */
@@ -160,29 +162,30 @@
     }
     .chip .ico{font-size:16px}
 
+    /* ✅ タイトルは長い時に自動縮小 + 折り返しOK */
     .menuTitle{
-      font-size: 44px;
+      font-size: 44px; /* ここはJSで収まりに応じて可変にする */
       font-weight: 950;
       margin: 6px 0 10px;
-      line-height: 1.1;
+      line-height: 1.08;
       letter-spacing: .01em;
       text-shadow: 0 8px 22px rgba(15,23,42,.12);
+      overflow-wrap: anywhere;
+      word-break: break-word;
     }
 
     .bannerBox{
       background: rgba(255,255,255,.55);
       border: 1px solid rgba(255,255,255,.65);
       border-radius: 20px;
-      padding: 0; /* ✅ ピッタリに */
-      overflow: hidden; /* ✅ 角丸に合わせて切る */
+      padding: 0;
+      overflow: hidden;
       box-shadow: 0 10px 20px rgba(15,23,42,.08);
     }
-    /* ✅ 画像が途切れないように変更（contain） */
     .banner{
       width: 100%;
       height: 140px;
-      object-fit: contain;          /* ← ここが重要 */
-      object-position: center;
+      object-fit: cover;
       display:block;
       border-radius: 0;
       background: rgba(255,255,255,.10);
@@ -200,6 +203,7 @@
       border-radius: 18px;
       padding: 14px 14px 12px;
       box-shadow: 0 10px 20px rgba(15,23,42,.08);
+      overflow:hidden;
     }
 
     .label{
@@ -212,7 +216,6 @@
     }
     .label .miniIco{ font-size: 18px; opacity:.9; line-height:1.2; margin-top:1px; }
 
-    /* ✅ ラベルを「1行目/2行目」に */
     .labelText{
       display:flex;
       flex-direction:column;
@@ -225,47 +228,39 @@
       font-size: 13px;
       margin-top: 4px;
     }
-.numRow{
-  display:flex;
-  align-items:center;        /* ← baselineやめる（iPhoneで崩れやすい） */
-  justify-content: space-between;
-  gap: 10px;
-}
 
-input[type="number"]{
-  flex: 1 1 auto;
-  width: 100%;              /* ← autoやめる（消える原因になりがち） */
-  min-width: 0;
-  font-size: 42px;
-  font-weight: 950;
-  line-height: 1.15;        /* ← 1だと潰れることがある */
-  letter-spacing: -0.03em;  /* ← 5桁でも入りやすく */
-  border: none;
-  outline: none;
-  background: transparent;
-  color: #0f172a;
-  padding: 0;
-  margin: 0;
+    /* ✅ 数字が5桁でも入るように：inputをflexで伸縮 + JSで自動縮小 */
+    .numRow{
+      display:flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 6px; /* 少し詰める */
+    }
+    input[type="number"]{
+      flex: 1;
+      min-width: 0;            /* これが無いと縮まないことがある */
+      width: 100%;
+      font-size: 42px;         /* JSが収まりに応じて下げる */
+      font-weight: 950;
+      border: none;
+      outline: none;
+      background: transparent;
+      color: #0f172a;
+      padding: 0;
+      -webkit-appearance: none;
+      appearance: textfield;
+      font-variant-numeric: tabular-nums; /* 桁の幅を揃えてブレ減らす */
+      letter-spacing: -0.01em;
+    }
+    .unit{
+      color: #64748b;
+      font-weight: 900;
+      font-size: 18px; /* 少し小さくして桁に余裕 */
+      white-space: nowrap;
+      padding-left: 4px;
+      flex: 0 0 auto;
+    }
 
-  -webkit-appearance: none;
-  appearance: textfield;
-}
-
-/* iPhoneの増減ボタンを消して表示安定 */
-input[type="number"]::-webkit-outer-spin-button,
-input[type="number"]::-webkit-inner-spin-button{
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-.unit{
-  flex: 0 0 auto;
-  color: #64748b;
-  font-weight: 900;
-  font-size: 20px;          /* ← 元の見た目に近く */
-  white-space: nowrap;
-  padding-left: 8px;
-}
     .btns{
       display:grid;
       grid-template-columns: 1fr 1fr;
@@ -415,10 +410,7 @@ input[type="number"]::-webkit-inner-spin-button{
       font-weight: 900;
     }
 
-    /* =========================================================
-       ✅ ここから炎を「全部書き直し」（ダイア化防止＋着火長め）
-       ========================================================= */
-
+    /* 継続画面（Duolingo風） */
     .streakWrap{
       display:flex;
       flex-direction:column;
@@ -429,7 +421,6 @@ input[type="number"]::-webkit-inner-spin-button{
       min-height: calc(100vh - 160px);
     }
 
-    /* ✅ 炎：形を炎っぽく＆着火時に崩れない */
     .flame{
       width: 120px;
       height: 160px;
@@ -437,8 +428,6 @@ input[type="number"]::-webkit-inner-spin-button{
       filter: drop-shadow(0 18px 28px rgba(0,0,0,.15));
       transform-origin: 50% 80%;
     }
-
-    /* 外炎 */
     .flame .outer{
       position:absolute; inset:0;
       border-radius: 58% 42% 72% 28% / 70% 70% 30% 30%;
@@ -448,8 +437,6 @@ input[type="number"]::-webkit-inner-spin-button{
       animation: flameOuter 1.15s ease-in-out infinite;
       will-change: transform;
     }
-
-    /* 内炎 */
     .flame .inner{
       position:absolute;
       left: 26px; top: 36px;
@@ -461,8 +448,6 @@ input[type="number"]::-webkit-inner-spin-button{
       animation: flameInner 1.15s ease-in-out infinite;
       will-change: transform;
     }
-
-    /* 芯 */
     .flame .core{
       position:absolute;
       left: 46px; top: 64px;
@@ -473,8 +458,6 @@ input[type="number"]::-webkit-inner-spin-button{
       animation: flameCore .95s ease-in-out infinite;
       will-change: transform;
     }
-
-    /* ゆらぎ */
     @keyframes flameOuter{
       0%,100%{ transform: translateY(0) rotate(-6deg) scale(1); }
       50%{    transform: translateY(-8px) rotate(-4deg) scale(1.035); }
@@ -488,7 +471,6 @@ input[type="number"]::-webkit-inner-spin-button{
       50%{    transform: scale(1.10); }
     }
 
-    /* ✅ 着火：flame本体は動かさず、中身だけボワン（ダイア化防止） */
     .flame.is-ignite .outer,
     .flame.is-ignite .inner,
     .flame.is-ignite .core{
@@ -531,11 +513,8 @@ input[type="number"]::-webkit-inner-spin-button{
       margin-top: 12px;
     }
 
-    /* 小さい端末対策 */
     @media (max-width: 420px){
       .title{ font-size: 34px; }
-      .menuTitle{ font-size: 38px; }
-      input[type="number"]{ font-size: 36px; } /* ✅ ここも5桁対策で少し控えめに */
       .banner{ height: 128px; }
     }
   </style>
@@ -658,7 +637,6 @@ input[type="number"]::-webkit-inner-spin-button{
       genki: {
         label: "元気",
         ico: "☀️",
-        // 元気だけランダム（再抽選ボタンは無し）
         random: [
           { name: "Fit Boxing", img: "assets/fitboxing.png" },
           { name: "Ring Fit", img: "assets/ringfit.png" },
@@ -722,21 +700,74 @@ input[type="number"]::-webkit-inner-spin-button{
     };
 
     function loadLogs(){
-      try{
-        return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-      }catch(e){ return []; }
+      try{ return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]"); }
+      catch(e){ return []; }
     }
-    function saveLogs(logs){
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(logs));
-    }
+    function saveLogs(logs){ localStorage.setItem(STORAGE_KEY, JSON.stringify(logs)); }
 
     function loadState(){
-      try{
-        return JSON.parse(localStorage.getItem(STATE_KEY) || "{}");
-      }catch(e){ return {}; }
+      try{ return JSON.parse(localStorage.getItem(STATE_KEY) || "{}"); }
+      catch(e){ return {}; }
     }
-    function saveState(s){
-      localStorage.setItem(STATE_KEY, JSON.stringify(s));
+    function saveState(s){ localStorage.setItem(STATE_KEY, JSON.stringify(s)); }
+
+    // ====== ✅ 文字はみ出し対策：自動フィット（入力/タイトル） ======
+    function fitTextToWidth(el, {maxPx=42, minPx=28} = {}){
+      if(!el) return;
+      el.style.fontSize = maxPx + "px";
+      // 少し待ってレイアウト確定後に測る（iOS Safari対策）
+      requestAnimationFrame(()=>{
+        let size = maxPx;
+        // scrollWidthがclientWidthを超えてたら縮める
+        while(size > minPx && el.scrollWidth > el.clientWidth){
+          size -= 1;
+          el.style.fontSize = size + "px";
+        }
+      });
+    }
+
+    function fitNumberInput(input){
+      // inputはscrollWidthが取りづらいことがあるので、一時的に同フォントで測るspanを作る
+      const wrap = input.parentElement;
+      if(!wrap) return;
+
+      const measure = document.createElement("span");
+      const cs = getComputedStyle(input);
+      measure.style.position = "absolute";
+      measure.style.visibility = "hidden";
+      measure.style.whiteSpace = "pre";
+      measure.style.fontFamily = cs.fontFamily;
+      measure.style.fontWeight = cs.fontWeight;
+      measure.style.letterSpacing = cs.letterSpacing;
+      measure.style.fontVariantNumeric = cs.fontVariantNumeric;
+      document.body.appendChild(measure);
+
+      const maxPx = 42, minPx = 28;
+      let size = maxPx;
+
+      const unit = wrap.querySelector(".unit");
+      const unitW = unit ? unit.getBoundingClientRect().width : 0;
+      const wrapW = wrap.getBoundingClientRect().width;
+      const paddingAllowance = 8; // 余白
+      const available = Math.max(0, wrapW - unitW - paddingAllowance);
+
+      const text = (input.value ?? "").toString();
+      const sample = text.length ? text : "0";
+      while(size > minPx){
+        measure.style.fontSize = size + "px";
+        measure.textContent = sample;
+        if(measure.getBoundingClientRect().width <= available) break;
+        size -= 1;
+      }
+      input.style.fontSize = size + "px";
+      measure.remove();
+    }
+
+    function refitAll(){
+      fitNumberInput(stepsInput);
+      fitNumberInput(minsInput);
+      // タイトルは長い時だけ縮める
+      fitTextToWidth(menuTitle, {maxPx:44, minPx:26});
     }
 
     // ====== Flame theme (7の倍数だけ色チェンジ) ======
@@ -758,9 +789,8 @@ input[type="number"]::-webkit-inner-spin-button{
         return;
       }
 
-      const phase = (Math.floor(streak / 7) - 1) % 4; // 0..3
+      const phase = (Math.floor(streak / 7) - 1) % 4;
       if(phase === 0){
-        // Blue
         root.setProperty("--flameA", "#b8e7ff");
         root.setProperty("--flameB", "#3aa7ff");
         root.setProperty("--flameC", "#2f6bff");
@@ -772,7 +802,6 @@ input[type="number"]::-webkit-inner-spin-button{
         root.setProperty("--flameNumB", "#2f6bff");
         root.setProperty("--flameLabel", "#2f6bff");
       }else if(phase === 1){
-        // Red
         root.setProperty("--flameA", "#ffd1d1");
         root.setProperty("--flameB", "#ff4d4d");
         root.setProperty("--flameC", "#d81b60");
@@ -784,7 +813,6 @@ input[type="number"]::-webkit-inner-spin-button{
         root.setProperty("--flameNumB", "#d81b60");
         root.setProperty("--flameLabel", "#d81b60");
       }else if(phase === 2){
-        // Yellow
         root.setProperty("--flameA", "#fff7b3");
         root.setProperty("--flameB", "#ffd400");
         root.setProperty("--flameC", "#ff9b3a");
@@ -796,7 +824,6 @@ input[type="number"]::-webkit-inner-spin-button{
         root.setProperty("--flameNumB", "#ff9b3a");
         root.setProperty("--flameLabel", "#c28b00");
       }else{
-        // Gold
         root.setProperty("--flameA", "#fff1a6");
         root.setProperty("--flameB", "#ffcf4a");
         root.setProperty("--flameC", "#ff8a2f");
@@ -810,19 +837,15 @@ input[type="number"]::-webkit-inner-spin-button{
       }
     }
 
-    // ✅ 着火→ボワン + バイブ（対応端末のみ）
     function igniteFlameAndVibrate(){
       const flame = document.getElementById("flame");
       if(flame){
         flame.classList.remove("is-ignite");
-        void flame.offsetWidth; // reflowでリセット
+        void flame.offsetWidth;
         flame.classList.add("is-ignite");
-        setTimeout(()=> flame.classList.remove("is-ignite"), 950); // ✅ 長めに
+        setTimeout(()=> flame.classList.remove("is-ignite"), 950);
       }
-
-      if (navigator.vibrate) {
-        navigator.vibrate([25, 40, 25]);
-      }
+      if (navigator.vibrate) navigator.vibrate([25, 40, 25]);
     }
 
     function showScreen(name){
@@ -836,6 +859,8 @@ input[type="number"]::-webkit-inner-spin-button{
       if(name==="home"){
         screenHome.classList.add("active");
         navHome.classList.add("active");
+        // ✅ 画面戻りでも崩れないように再フィット
+        setTimeout(refitAll, 0);
       }else if(name==="history"){
         screenHistory.classList.add("active");
         navHistory.classList.add("active");
@@ -856,21 +881,11 @@ input[type="number"]::-webkit-inner-spin-button{
       }
 
       const conf = MENUS[mood];
-      let chosen;
+      const chosen = conf.random
+        ? conf.random[Math.floor(Math.random()*conf.random.length)]
+        : conf.fixed;
 
-      if(conf.random){
-        chosen = conf.random[Math.floor(Math.random()*conf.random.length)];
-      }else{
-        chosen = conf.fixed;
-      }
-
-      saveState({
-        date: t,
-        mood,
-        menuName: chosen.name,
-        menuImg: chosen.img
-      });
-
+      saveState({ date:t, mood, menuName: chosen.name, menuImg: chosen.img });
       return chosen;
     }
 
@@ -887,12 +902,13 @@ input[type="number"]::-webkit-inner-spin-button{
       menuImg.src = chosen.img;
 
       err.classList.remove("show");
+
+      // ✅ タイトルがはみ出すのを即修正
+      setTimeout(refitAll, 0);
     }
 
     // ====== Validation ======
-    function isBlank(v){
-      return v === null || v === undefined || String(v).trim() === "";
-    }
+    function isBlank(v){ return v === null || v === undefined || String(v).trim() === ""; }
     function validateInputs(){
       if(isBlank(stepsInput.value) || isBlank(minsInput.value)){
         err.classList.add("show");
@@ -974,7 +990,6 @@ input[type="number"]::-webkit-inner-spin-button{
       });
     }
 
-    // CSV export（Excelで開ける）
     function exportCSV(){
       const logs = loadLogs();
       if(!logs.length){
@@ -986,14 +1001,7 @@ input[type="number"]::-webkit-inner-spin-button{
 
       logs.slice().reverse().forEach(x=>{
         const esc = (s)=> `"${String(s).replaceAll('"','""')}"`;
-        lines.push([
-          esc(x.date),
-          esc(x.time),
-          esc(x.moodLabel),
-          esc(x.menu),
-          x.steps,
-          x.mins
-        ].join(","));
+        lines.push([esc(x.date), esc(x.time), esc(x.moodLabel), esc(x.menu), x.steps, x.mins].join(","));
       });
 
       const blob = new Blob([lines.join("\n")], {type:"text/csv;charset=utf-8"});
@@ -1011,9 +1019,15 @@ input[type="number"]::-webkit-inner-spin-button{
     moodTabs.addEventListener("click", (e)=>{
       const btn = e.target.closest(".mood");
       if(!btn) return;
-      const mood = btn.dataset.mood;
-      applyMood(mood);
+      applyMood(btn.dataset.mood);
     });
+
+    // ✅ 入力するたびにフィット（5桁でもOK）
+    stepsInput.addEventListener("input", ()=> fitNumberInput(stepsInput));
+    minsInput.addEventListener("input", ()=> fitNumberInput(minsInput));
+
+    // 画面回転などでも崩れないように
+    window.addEventListener("resize", ()=> setTimeout(refitAll, 0));
 
     btnDone.addEventListener("click", ()=>{
       if(!validateInputs()) return;
@@ -1022,20 +1036,13 @@ input[type="number"]::-webkit-inner-spin-button{
       const mood = st.mood || "genki";
       const menu = st.menuName || menuTitle.textContent;
 
-      addLog({
-        mood,
-        menu,
-        steps: stepsInput.value,
-        mins: minsInput.value
-      });
+      addLog({ mood, menu, steps: stepsInput.value, mins: minsInput.value });
 
       const streak = computeStreak();
       streakNumEl.textContent = streak;
 
       setFlameThemeForStreak(streak);
-
       showScreen("streak");
-
       igniteFlameAndVibrate();
 
       stepsInput.select?.();
@@ -1048,12 +1055,7 @@ input[type="number"]::-webkit-inner-spin-button{
       const mood = st.mood || "genki";
       const menu = st.menuName || menuTitle.textContent;
 
-      addLog({
-        mood,
-        menu,
-        steps: stepsInput.value,
-        mins: minsInput.value
-      });
+      addLog({ mood, menu, steps: stepsInput.value, mins: minsInput.value });
 
       stepsInput.value = "";
       minsInput.value = "";
@@ -1061,6 +1063,9 @@ input[type="number"]::-webkit-inner-spin-button{
       stepsInput.focus();
 
       lastLine.textContent = `記録: ${todayKey()} ${nowTime()} / 追加で記録したよ`;
+
+      // ✅ クリア後もサイズ戻す
+      setTimeout(refitAll, 0);
     });
 
     navHome.addEventListener("click", ()=> showScreen("home"));
@@ -1093,6 +1098,9 @@ input[type="number"]::-webkit-inner-spin-button{
       }
 
       setFlameThemeForStreak(computeStreak());
+
+      // ✅ 初回もフィット
+      setTimeout(refitAll, 0);
     })();
   </script>
 </body>

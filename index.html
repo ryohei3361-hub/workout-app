@@ -163,16 +163,21 @@
     .chip .ico{font-size:16px}
 
     /* ✅ タイトルは長い時に自動縮小 + 折り返しOK */
-    .menuTitle{
-      font-size: 44px; /* ここはJSで収まりに応じて可変にする */
-      font-weight: 950;
-      margin: 6px 0 10px;
-      line-height: 1.08;
-      letter-spacing: .01em;
-      text-shadow: 0 8px 22px rgba(15,23,42,.12);
-      overflow-wrap: anywhere;
-      word-break: break-word;
-    }
+  .menuTitle{
+  font-size: 44px; /* JSで可変にする */
+  font-weight: 950;
+  margin: 6px 0 10px;
+  line-height: 1.06;
+  letter-spacing: .01em;
+  text-shadow: 0 8px 22px rgba(15,23,42,.12);
+
+  display:block;
+  max-width: 100%;
+  white-space: nowrap;     /* ✅ 1行固定 */
+  overflow: hidden;        /* ✅ はみ出しを切る（JSで縮むので基本切れない） */
+  text-overflow: clip;
+}
+    
 
     .bannerBox{
       background: rgba(255,255,255,.55);
@@ -762,14 +767,46 @@
       input.style.fontSize = size + "px";
       measure.remove();
     }
+function fitMenuTitle(){
+  if(!menuTitle) return;
+
+  const parent = menuTitle.parentElement;
+  if(!parent) return;
+
+  const measure = document.createElement("span");
+  const cs = getComputedStyle(menuTitle);
+  measure.style.position = "absolute";
+  measure.style.visibility = "hidden";
+  measure.style.whiteSpace = "nowrap";
+  measure.style.fontFamily = cs.fontFamily;
+  measure.style.fontWeight = cs.fontWeight;
+  measure.style.letterSpacing = cs.letterSpacing;
+  document.body.appendChild(measure);
+
+  const maxPx = 44, minPx = 22;
+  let size = maxPx;
+
+  // 親（panel）の内側幅に合わせる
+  const available = parent.getBoundingClientRect().width;
+
+  const text = menuTitle.textContent || "";
+  while(size > minPx){
+    measure.style.fontSize = size + "px";
+    measure.textContent = text;
+    if(measure.getBoundingClientRect().width <= available) break;
+    size -= 1;
+  }
+
+  menuTitle.style.fontSize = size + "px";
+  measure.remove();
+}
 
     function refitAll(){
-      fitNumberInput(stepsInput);
-      fitNumberInput(minsInput);
-      // タイトルは長い時だけ縮める
-      fitTextToWidth(menuTitle, {maxPx:44, minPx:26});
-    }
-
+  fitNumberInput(stepsInput);
+  fitNumberInput(minsInput);
+  fitMenuTitle();
+}
+    
     // ====== Flame theme (7の倍数だけ色チェンジ) ======
     function setFlameThemeForStreak(streak){
       const root = document.documentElement.style;

@@ -152,7 +152,7 @@
     }
     .chip .ico{font-size:16px}
 
-    /* ✅ タイトルは長い時に自動縮小（JS）＋折返しも許可 */
+    /* ✅ タイトル：長い時に縮む（JS）＋折返しOK */
     .menuTitle{
       font-size: 44px; /* JSで調整 */
       font-weight: 950;
@@ -175,8 +175,11 @@
     .banner{
       width: 100%;
       height: 140px;
-      object-fit: cover;
-      object-position: center; /* ✅ 途切れ方が偏らない */
+
+      /* ✅ 画像が途切れない（全部見える） */
+      object-fit: contain;
+      object-position: center;
+
       display:block;
       background: rgba(255,255,255,.10);
     }
@@ -219,7 +222,7 @@
       margin-top: 4px;
     }
 
-    /* ✅ 5桁でも入る土台（幅をちゃんと縮められるように） */
+    /* ✅ 数字がはみ出さない土台 */
     .numRow{
       display:flex;
       align-items: baseline;
@@ -671,7 +674,6 @@
 
     // ====== ✅ フィット系（タイトル / 数字） ======
 
-    // タイトル：親幅に収まるまで縮める（scrollWidth方式は信用しない）
     function fitMenuTitle(){
       if(!menuTitle) return;
       const parent = menuTitle.parentElement;
@@ -688,10 +690,9 @@
       document.body.appendChild(measure);
 
       const text = menuTitle.textContent || "";
-      const maxPx = 44, minPx = 20;
+      const maxPx = 44, minPx = 18;
       let size = maxPx;
 
-      // 「改行してもOK」だけど、まず1行で収まる範囲まで縮める
       const available = parent.getBoundingClientRect().width;
 
       while(size > minPx){
@@ -704,7 +705,6 @@
       measure.remove();
     }
 
-    // 入力：5桁でも収まるまで縮める（単位ぶんの幅を引いて計算）
     function fitNumberInput(input){
       const wrap = input.parentElement;
       if(!wrap) return;
@@ -726,7 +726,7 @@
       const unit = wrap.querySelector(".unit");
       const unitW = unit ? unit.getBoundingClientRect().width : 0;
       const wrapW = wrap.getBoundingClientRect().width;
-      const available = Math.max(0, wrapW - unitW - 10); // 余白ぶん
+      const available = Math.max(0, wrapW - unitW - 10);
 
       const text = (input.value ?? "").toString();
       const sample = text.length ? text : "0";
@@ -999,7 +999,12 @@
     // ✅ 入力するたびにフィット
     stepsInput.addEventListener("input", ()=> fitNumberInput(stepsInput));
     minsInput.addEventListener("input", ()=> fitNumberInput(minsInput));
+
+    // ✅ 回転/リサイズでも崩れない
     window.addEventListener("resize", ()=> setTimeout(refitAll, 0));
+
+    // ✅ 画像/レイアウト確定後も再フィット
+    window.addEventListener("load", ()=> setTimeout(refitAll, 0));
 
     btnDone.addEventListener("click", ()=>{
       if(!validateInputs()) return;
@@ -1065,7 +1070,14 @@
       }
 
       setFlameThemeForStreak(computeStreak());
+
+      // ✅ 初回フィット（まず1回）
       setTimeout(refitAll, 0);
+
+      // ✅ フォント確定後にもう1回（iOSで超効く）
+      if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(() => setTimeout(refitAll, 0));
+      }
     })();
   </script>
 </body>

@@ -153,16 +153,18 @@
     .chip .ico{font-size:16px}
 
     /* ✅ タイトル：長い時に縮む（JS）＋折返しOK */
-    .menuTitle{
-      font-size: 44px; /* JSで調整 */
-      font-weight: 950;
-      margin: 6px 0 10px;
-      line-height: 1.08;
-      letter-spacing: .01em;
-      text-shadow: 0 8px 22px rgba(15,23,42,.12);
-      overflow-wrap: anywhere;
-      word-break: break-word;
-    }
+  .menuTitle{
+  font-size: 44px; /* JSで調整 */
+  font-weight: 950;
+  margin: 6px 0 10px;
+  line-height: 1.08;
+  letter-spacing: .01em;
+  text-shadow: 0 8px 22px rgba(15,23,42,.12);
+
+  /* ✅ ここが肝：折り返し禁止 */
+  white-space: nowrap;
+  overflow: hidden;        /* 念のため */
+}
 
   .bannerBox{
   background: rgba(255,255,255,.55);
@@ -675,35 +677,34 @@
     // ====== ✅ フィット系（タイトル / 数字） ======
 
     function fitMenuTitle(){
-      if(!menuTitle) return;
-      const parent = menuTitle.parentElement;
-      if(!parent) return;
+  if(!menuTitle) return;
 
-      const measure = document.createElement("span");
-      const cs = getComputedStyle(menuTitle);
-      measure.style.position = "absolute";
-      measure.style.visibility = "hidden";
-      measure.style.whiteSpace = "pre";
-      measure.style.fontFamily = cs.fontFamily;
-      measure.style.fontWeight = cs.fontWeight;
-      measure.style.letterSpacing = cs.letterSpacing;
-      document.body.appendChild(measure);
+  const measure = document.createElement("span");
+  const cs = getComputedStyle(menuTitle);
+  measure.style.position = "absolute";
+  measure.style.visibility = "hidden";
+  measure.style.whiteSpace = "pre";
+  measure.style.fontFamily = cs.fontFamily;
+  measure.style.fontWeight = cs.fontWeight;
+  measure.style.letterSpacing = cs.letterSpacing;
+  document.body.appendChild(measure);
 
-      const text = menuTitle.textContent || "";
-      const maxPx = 44, minPx = 18;
-      let size = maxPx;
+  const text = menuTitle.textContent || "";
+  const maxPx = 44, minPx = 16;
+  let size = maxPx;
 
-      const available = parent.getBoundingClientRect().width;
+  // ✅ 「menuTitle 自身の表示幅」を基準にする（親じゃなくてOK）
+  const available = menuTitle.getBoundingClientRect().width;
 
-      while(size > minPx){
-        measure.style.fontSize = size + "px";
-        measure.textContent = text;
-        if(measure.getBoundingClientRect().width <= available) break;
-        size -= 1;
-      }
-      menuTitle.style.fontSize = size + "px";
-      measure.remove();
-    }
+  while(size > minPx){
+    measure.style.fontSize = size + "px";
+    measure.textContent = text;
+    if(measure.getBoundingClientRect().width <= available) break;
+    size -= 1;
+  }
+  menuTitle.style.fontSize = size + "px";
+  measure.remove();
+}
 
     function fitNumberInput(input){
       const wrap = input.parentElement;

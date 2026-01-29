@@ -164,25 +164,25 @@
       word-break: break-word;
     }
 
-    .bannerBox{
-      background: rgba(255,255,255,.55);
-      border: 1px solid rgba(255,255,255,.65);
-      border-radius: 20px;
-      padding: 0;
-      overflow: hidden;
-      box-shadow: 0 10px 20px rgba(15,23,42,.08);
-    }
-    .banner{
-      width: 100%;
-      height: 140px;
+  .bannerBox{
+  background: rgba(255,255,255,.55);
+  border: 1px solid rgba(255,255,255,.65);
+  border-radius: 20px;
+  padding: 10px;                 /* ✅ 内側余白を追加（端が切れない） */
+  overflow: hidden;
+  box-shadow: 0 10px 20px rgba(15,23,42,.08);
+}
 
-      /* ✅ 画像が途切れない（全部見える） */
-      object-fit: contain;
-      object-position: center;
-
-      display:block;
-      background: rgba(255,255,255,.10);
-    }
+.banner{
+  width: 100%;
+  aspect-ratio: 1200 / 432;       /* ✅ 1200×432の比率で枠を作る */
+  height: auto;                   /* ✅ 高さ固定をやめる */
+  object-fit: contain;            /* ✅ 全部見せる */
+  object-position: center;
+  display:block;
+  border-radius: 14px;            /* ✅ 画像も内側で角丸 */
+  background: rgba(255,255,255,.10);
+}
 
     .inputs{
       display:grid;

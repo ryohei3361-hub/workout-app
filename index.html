@@ -10,17 +10,9 @@
       --ink:#1f2937;
       --muted:#6b7280;
       --card:rgba(255,255,255,.78);
-      --card2:rgba(255,255,255,.62);
-      --stroke:rgba(255,255,255,.55);
       --shadow: 0 16px 40px rgba(15,23,42,.12);
       --shadow2: 0 10px 24px rgba(15,23,42,.10);
       --radius: 26px;
-      --radius2: 18px;
-
-      --gold1:#ffd76a; --gold2:#ffb800;
-      --mint1:#bff1e6; --mint2:#2bd4bd;
-      --vio1:#cbbcff;  --vio2:#7c5cff;
-      --slate1:#d9dfe8;--slate2:#9aa7b8;
 
       --cta1:#ffb45a; --cta2:#ff7a45;
       --ctaB1:#6aa9ff;--ctaB2:#2f6bff;
@@ -44,19 +36,17 @@
       font-family: ui-rounded, system-ui, -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP", sans-serif;
       color:var(--ink);
       min-height:100vh;
-      background: #eef4ff;
+      background:#eef4ff;
 
-      /* ✅ 背景画像（指定名に合わせる） */
+      /* ✅ iPhoneで拡大ズレしがちな fixed を使わない */
       background-image: url("assets/background.png");
       background-size: cover;
       background-repeat: no-repeat;
       background-position: center top;
-
-      /* ✅ iPhoneでbackground-attachment:fixedが暴れて拡大ズレすることがあるのでOFF */
       background-attachment: scroll;
     }
 
-    /* ✨ ふわキラ重ね（不要ならOFF：opacityを0に） */
+    /* ✨ ふわキラ（不要なら opacity:0 のまま） */
     body::before{
       content:"";
       position:fixed; inset:0;
@@ -70,7 +60,7 @@
         radial-gradient(1.2px 1.2px at 18% 72%, rgba(255,255,255,.7), rgba(255,255,255,0) 62%),
         radial-gradient(1.7px 1.7px at 52% 76%, rgba(255,255,255,.65), rgba(255,255,255,0) 62%),
         radial-gradient(1.2px 1.2px at 86% 78%, rgba(255,255,255,.7), rgba(255,255,255,0) 62%);
-      opacity:0; /* ← キラキラ不要なら 0 のまま */
+      opacity:0;
       filter: blur(.2px);
       animation: twinkle 6s ease-in-out infinite;
     }
@@ -162,22 +152,17 @@
     }
     .chip .ico{font-size:16px}
 
-    /* ✅ タイトルは長い時に自動縮小 + 折り返しOK */
-  .menuTitle{
-  font-size: 44px; /* JSで可変にする */
-  font-weight: 950;
-  margin: 6px 0 10px;
-  line-height: 1.06;
-  letter-spacing: .01em;
-  text-shadow: 0 8px 22px rgba(15,23,42,.12);
-
-  display:block;
-  max-width: 100%;
-  white-space: nowrap;     /* ✅ 1行固定 */
-  overflow: hidden;        /* ✅ はみ出しを切る（JSで縮むので基本切れない） */
-  text-overflow: clip;
-}
-    
+    /* ✅ タイトルは長い時に自動縮小（JS）＋折返しも許可 */
+    .menuTitle{
+      font-size: 44px; /* JSで調整 */
+      font-weight: 950;
+      margin: 6px 0 10px;
+      line-height: 1.08;
+      letter-spacing: .01em;
+      text-shadow: 0 8px 22px rgba(15,23,42,.12);
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
 
     .bannerBox{
       background: rgba(255,255,255,.55);
@@ -191,8 +176,8 @@
       width: 100%;
       height: 140px;
       object-fit: cover;
+      object-position: center; /* ✅ 途切れ方が偏らない */
       display:block;
-      border-radius: 0;
       background: rgba(255,255,255,.10);
     }
 
@@ -234,18 +219,18 @@
       margin-top: 4px;
     }
 
-    /* ✅ 数字が5桁でも入るように：inputをflexで伸縮 + JSで自動縮小 */
+    /* ✅ 5桁でも入る土台（幅をちゃんと縮められるように） */
     .numRow{
       display:flex;
       align-items: baseline;
       justify-content: space-between;
-      gap: 6px; /* 少し詰める */
+      gap: 6px;
     }
     input[type="number"]{
       flex: 1;
-      min-width: 0;            /* これが無いと縮まないことがある */
+      min-width: 0;
       width: 100%;
-      font-size: 42px;         /* JSが収まりに応じて下げる */
+      font-size: 42px; /* JSで調整 */
       font-weight: 950;
       border: none;
       outline: none;
@@ -254,13 +239,13 @@
       padding: 0;
       -webkit-appearance: none;
       appearance: textfield;
-      font-variant-numeric: tabular-nums; /* 桁の幅を揃えてブレ減らす */
+      font-variant-numeric: tabular-nums;
       letter-spacing: -0.01em;
     }
     .unit{
       color: #64748b;
       font-weight: 900;
-      font-size: 18px; /* 少し小さくして桁に余裕 */
+      font-size: 18px;
       white-space: nowrap;
       padding-left: 4px;
       flex: 0 0 auto;
@@ -280,21 +265,18 @@
       font-weight: 950;
       color: white;
       box-shadow: 0 16px 30px rgba(15,23,42,.18);
-      transition: transform .12s ease, filter .12s ease;
+      transition: transform .12s ease;
     }
     .btn:active{ transform: scale(.985); }
-    .btn.primary{
-      background: linear-gradient(180deg, var(--cta1), var(--cta2));
-    }
-    .btn.secondary{
-      background: linear-gradient(180deg, var(--ctaB1), var(--ctaB2));
-    }
+    .btn.primary{ background: linear-gradient(180deg, var(--cta1), var(--cta2)); }
+    .btn.secondary{ background: linear-gradient(180deg, var(--ctaB1), var(--ctaB2)); }
 
     .hint{
       margin-top: 10px;
       text-align:center;
       color: var(--muted);
       font-weight: 800;
+      word-break: break-word;
     }
     .error{
       display:none;
@@ -339,9 +321,7 @@
       color: #1f2937;
       box-shadow: 0 10px 20px rgba(15,23,42,.08);
     }
-    .navBtn.active{
-      background: rgba(210,226,255,.75);
-    }
+    .navBtn.active{ background: rgba(210,226,255,.75); }
     .navBtn .navIco{ font-size: 20px; }
 
     /* 画面切り替え */
@@ -362,9 +342,7 @@
       font-weight: 950;
       margin: 0;
     }
-    .hActions{
-      display:flex; gap:10px; flex-wrap:wrap;
-    }
+    .hActions{ display:flex; gap:10px; flex-wrap:wrap; }
     .hBtn{
       border:none;
       border-radius: 14px;
@@ -374,10 +352,7 @@
     }
     .hBtn.export{ background: rgba(255,255,255,.75); }
     .hBtn.clear{ background: rgba(255,235,235,.85); color:#991b1b; }
-    .list{
-      display:flex; flex-direction:column; gap: 10px;
-      margin-top: 10px;
-    }
+    .list{ display:flex; flex-direction:column; gap: 10px; margin-top: 10px; }
     .row{
       display:flex;
       gap: 12px;
@@ -389,18 +364,9 @@
       background: rgba(255,255,255,.70);
       box-shadow: 0 10px 20px rgba(15,23,42,.08);
     }
-    .rowLeft{
-      display:flex; flex-direction:column; gap: 3px;
-    }
-    .rowMain{
-      font-weight: 950;
-      font-size: 16px;
-    }
-    .rowSub{
-      color:#64748b;
-      font-weight: 850;
-      font-size: 13px;
-    }
+    .rowLeft{ display:flex; flex-direction:column; gap: 3px; }
+    .rowMain{ font-weight: 950; font-size: 16px; }
+    .rowSub{ color:#64748b; font-weight: 850; font-size: 13px; }
     .del{
       border:none;
       border-radius: 14px;
@@ -415,7 +381,7 @@
       font-weight: 900;
     }
 
-    /* 継続画面（Duolingo風） */
+    /* 継続画面 */
     .streakWrap{
       display:flex;
       flex-direction:column;
@@ -509,7 +475,6 @@
       letter-spacing:.02em;
       margin-top:-6px;
     }
-
     .streakBtns{
       width: min(520px, 100%);
       display:grid;
@@ -648,21 +613,9 @@
           { name: "HOP!STEP!DANCE!", img: "assets/hopstepdance.png" }
         ],
       },
-      futsu: {
-        label: "ふつう",
-        ico: "💙",
-        fixed: { name: "Fit Boxing", img: "assets/fitboxing.png" }
-      },
-      shindoi: {
-        label: "しんどい",
-        ico: "🙂‍↕️",
-        fixed: { name: "YOGA", img: "assets/yoga.png" }
-      },
-      rest: {
-        label: "休息",
-        ico: "🐾",
-        fixed: { name: "Rest", img: "assets/rest.png" }
-      }
+      futsu: { label: "ふつう", ico: "💙", fixed: { name: "Fit Boxing", img: "assets/fitboxing.png" } },
+      shindoi:{ label: "しんどい", ico: "🙂‍↕️", fixed: { name: "YOGA", img: "assets/yoga.png" } },
+      rest:   { label: "休息", ico: "🐾", fixed: { name: "Rest", img: "assets/rest.png" } }
     };
 
     // ====== DOM ======
@@ -716,23 +669,43 @@
     }
     function saveState(s){ localStorage.setItem(STATE_KEY, JSON.stringify(s)); }
 
-    // ====== ✅ 文字はみ出し対策：自動フィット（入力/タイトル） ======
-    function fitTextToWidth(el, {maxPx=42, minPx=28} = {}){
-      if(!el) return;
-      el.style.fontSize = maxPx + "px";
-      // 少し待ってレイアウト確定後に測る（iOS Safari対策）
-      requestAnimationFrame(()=>{
-        let size = maxPx;
-        // scrollWidthがclientWidthを超えてたら縮める
-        while(size > minPx && el.scrollWidth > el.clientWidth){
-          size -= 1;
-          el.style.fontSize = size + "px";
-        }
-      });
+    // ====== ✅ フィット系（タイトル / 数字） ======
+
+    // タイトル：親幅に収まるまで縮める（scrollWidth方式は信用しない）
+    function fitMenuTitle(){
+      if(!menuTitle) return;
+      const parent = menuTitle.parentElement;
+      if(!parent) return;
+
+      const measure = document.createElement("span");
+      const cs = getComputedStyle(menuTitle);
+      measure.style.position = "absolute";
+      measure.style.visibility = "hidden";
+      measure.style.whiteSpace = "pre";
+      measure.style.fontFamily = cs.fontFamily;
+      measure.style.fontWeight = cs.fontWeight;
+      measure.style.letterSpacing = cs.letterSpacing;
+      document.body.appendChild(measure);
+
+      const text = menuTitle.textContent || "";
+      const maxPx = 44, minPx = 20;
+      let size = maxPx;
+
+      // 「改行してもOK」だけど、まず1行で収まる範囲まで縮める
+      const available = parent.getBoundingClientRect().width;
+
+      while(size > minPx){
+        measure.style.fontSize = size + "px";
+        measure.textContent = text;
+        if(measure.getBoundingClientRect().width <= available) break;
+        size -= 1;
+      }
+      menuTitle.style.fontSize = size + "px";
+      measure.remove();
     }
 
+    // 入力：5桁でも収まるまで縮める（単位ぶんの幅を引いて計算）
     function fitNumberInput(input){
-      // inputはscrollWidthが取りづらいことがあるので、一時的に同フォントで測るspanを作る
       const wrap = input.parentElement;
       if(!wrap) return;
 
@@ -747,17 +720,17 @@
       measure.style.fontVariantNumeric = cs.fontVariantNumeric;
       document.body.appendChild(measure);
 
-      const maxPx = 38, minPx = 18;
+      const maxPx = 42, minPx = 26;
       let size = maxPx;
 
       const unit = wrap.querySelector(".unit");
       const unitW = unit ? unit.getBoundingClientRect().width : 0;
       const wrapW = wrap.getBoundingClientRect().width;
-      const paddingAllowance = 8; // 余白
-      const available = Math.max(0, wrapW - unitW - paddingAllowance);
+      const available = Math.max(0, wrapW - unitW - 10); // 余白ぶん
 
       const text = (input.value ?? "").toString();
       const sample = text.length ? text : "0";
+
       while(size > minPx){
         measure.style.fontSize = size + "px";
         measure.textContent = sample;
@@ -767,46 +740,13 @@
       input.style.fontSize = size + "px";
       measure.remove();
     }
-function fitMenuTitle(){
-  if(!menuTitle) return;
-
-  const parent = menuTitle.parentElement;
-  if(!parent) return;
-
-  const measure = document.createElement("span");
-  const cs = getComputedStyle(menuTitle);
-  measure.style.position = "absolute";
-  measure.style.visibility = "hidden";
-  measure.style.whiteSpace = "nowrap";
-  measure.style.fontFamily = cs.fontFamily;
-  measure.style.fontWeight = cs.fontWeight;
-  measure.style.letterSpacing = cs.letterSpacing;
-  document.body.appendChild(measure);
-
-  const maxPx = 44, minPx = 22;
-  let size = maxPx;
-
-  // 親（panel）の内側幅に合わせる
-  const available = parent.getBoundingClientRect().width;
-
-  const text = menuTitle.textContent || "";
-  while(size > minPx){
-    measure.style.fontSize = size + "px";
-    measure.textContent = text;
-    if(measure.getBoundingClientRect().width <= available) break;
-    size -= 1;
-  }
-
-  menuTitle.style.fontSize = size + "px";
-  measure.remove();
-}
 
     function refitAll(){
-  fitNumberInput(stepsInput);
-  fitNumberInput(minsInput);
-  fitMenuTitle();
-}
-    
+      fitMenuTitle();
+      fitNumberInput(stepsInput);
+      fitNumberInput(minsInput);
+    }
+
     // ====== Flame theme (7の倍数だけ色チェンジ) ======
     function setFlameThemeForStreak(streak){
       const root = document.documentElement.style;
@@ -896,7 +836,6 @@ function fitMenuTitle(){
       if(name==="home"){
         screenHome.classList.add("active");
         navHome.classList.add("active");
-        // ✅ 画面戻りでも崩れないように再フィット
         setTimeout(refitAll, 0);
       }else if(name==="history"){
         screenHistory.classList.add("active");
@@ -939,8 +878,6 @@ function fitMenuTitle(){
       menuImg.src = chosen.img;
 
       err.classList.remove("show");
-
-      // ✅ タイトルがはみ出すのを即修正
       setTimeout(refitAll, 0);
     }
 
@@ -1059,11 +996,9 @@ function fitMenuTitle(){
       applyMood(btn.dataset.mood);
     });
 
-    // ✅ 入力するたびにフィット（5桁でもOK）
+    // ✅ 入力するたびにフィット
     stepsInput.addEventListener("input", ()=> fitNumberInput(stepsInput));
     minsInput.addEventListener("input", ()=> fitNumberInput(minsInput));
-
-    // 画面回転などでも崩れないように
     window.addEventListener("resize", ()=> setTimeout(refitAll, 0));
 
     btnDone.addEventListener("click", ()=>{
@@ -1077,11 +1012,10 @@ function fitMenuTitle(){
 
       const streak = computeStreak();
       streakNumEl.textContent = streak;
-
       setFlameThemeForStreak(streak);
+
       showScreen("streak");
       igniteFlameAndVibrate();
-
       stepsInput.select?.();
     });
 
@@ -1100,17 +1034,13 @@ function fitMenuTitle(){
       stepsInput.focus();
 
       lastLine.textContent = `記録: ${todayKey()} ${nowTime()} / 追加で記録したよ`;
-
-      // ✅ クリア後もサイズ戻す
       setTimeout(refitAll, 0);
     });
 
     navHome.addEventListener("click", ()=> showScreen("home"));
     navHistory.addEventListener("click", ()=> showScreen("history"));
-
     btnBackHome.addEventListener("click", ()=> showScreen("home"));
     btnGoHistory.addEventListener("click", ()=> showScreen("history"));
-
     btnExport.addEventListener("click", exportCSV);
 
     btnClear.addEventListener("click", ()=>{
@@ -1135,8 +1065,6 @@ function fitMenuTitle(){
       }
 
       setFlameThemeForStreak(computeStreak());
-
-      // ✅ 初回もフィット
       setTimeout(refitAll, 0);
     })();
   </script>

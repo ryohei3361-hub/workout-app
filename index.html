@@ -152,39 +152,34 @@
     }
     .chip .ico{font-size:16px}
 
-    /* ✅ タイトル：長い時に縮む（JS）＋折返しOK */
-  .menuTitle{
-  font-size: 44px; /* JSで調整 */
-  font-weight: 950;
-  margin: 6px 0 10px;
-  line-height: 1.08;
-  letter-spacing: .01em;
-  text-shadow: 0 8px 22px rgba(15,23,42,.12);
+    /* ✅ タイトルは長い時に自動縮小（JS）＋折返しも許可 */
+    .menuTitle{
+      font-size: 44px; /* JSで調整 */
+      font-weight: 950;
+      margin: 6px 0 10px;
+      line-height: 1.08;
+      letter-spacing: .01em;
+      text-shadow: 0 8px 22px rgba(15,23,42,.12);
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
 
-  /* ✅ ここが肝：折り返し禁止 */
-  white-space: nowrap;
-  overflow: hidden;        /* 念のため */
-}
-
-  .bannerBox{
-  background: rgba(255,255,255,.55);
-  border: 1px solid rgba(255,255,255,.65);
-  border-radius: 20px;
-  padding: 10px;                 /* ✅ 内側余白を追加（端が切れない） */
-  overflow: hidden;
-  box-shadow: 0 10px 20px rgba(15,23,42,.08);
-}
-
-.banner{
-  width: 100%;
-  aspect-ratio: 1200 / 432;       /* ✅ 1200×432の比率で枠を作る */
-  height: auto;                   /* ✅ 高さ固定をやめる */
-  object-fit: contain;            /* ✅ 全部見せる */
-  object-position: center;
-  display:block;
-  border-radius: 14px;            /* ✅ 画像も内側で角丸 */
-  background: rgba(255,255,255,.10);
-}
+    .bannerBox{
+      background: rgba(255,255,255,.55);
+      border: 1px solid rgba(255,255,255,.65);
+      border-radius: 20px;
+      padding: 0;
+      overflow: hidden;
+      box-shadow: 0 10px 20px rgba(15,23,42,.08);
+    }
+    .banner{
+      width: 100%;
+      height: 140px;
+      object-fit: cover;
+      object-position: center;
+      display:block;
+      background: rgba(255,255,255,.10);
+    }
 
     .inputs{
       display:grid;
@@ -224,7 +219,7 @@
       margin-top: 4px;
     }
 
-    /* ✅ 数字がはみ出さない土台 */
+    /* ✅ 5桁でも入る土台 */
     .numRow{
       display:flex;
       align-items: baseline;
@@ -384,6 +379,49 @@
       padding: 24px 12px;
       color:#64748b;
       font-weight: 900;
+    }
+
+    /* ✅ 過去分追加フォーム（シンプル） */
+    .pastAdder{ margin: 6px 0 8px; }
+    .pastForm{
+      margin-top: 10px;
+      padding: 12px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.65);
+      background: rgba(255,255,255,.60);
+      box-shadow: 0 10px 20px rgba(15,23,42,.08);
+      display: none;
+    }
+    .pastForm.show{ display:block; }
+
+    .pastGrid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .pastSpan2{ grid-column: 1 / -1; }
+
+    .pastField{ display:flex; flex-direction:column; gap: 6px; }
+    .pastLabel{
+      font-weight: 900;
+      color:#334155;
+      font-size: 13px;
+    }
+    .pastField input,
+    .pastField select{
+      border: 1px solid rgba(255,255,255,.75);
+      background: rgba(255,255,255,.75);
+      border-radius: 14px;
+      padding: 10px 12px;
+      font-weight: 900;
+      color:#0f172a;
+      outline: none;
+    }
+    .pastActions{
+      display:flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 10px;
     }
 
     /* 継続画面 */
@@ -571,6 +609,52 @@
           </div>
         </div>
 
+        <!-- ✅ 過去分入力（ボタン→フォーム表示） -->
+        <div class="pastAdder">
+          <button class="hBtn export" id="btnAddPast" type="button">＋ 過去分を追加</button>
+
+          <div class="pastForm" id="pastForm" aria-hidden="true">
+            <div class="pastGrid">
+              <label class="pastField">
+                <span class="pastLabel">日付</span>
+                <input id="pastDate" type="date" />
+              </label>
+
+              <label class="pastField">
+                <span class="pastLabel">体調</span>
+                <select id="pastMood">
+                  <option value="genki">元気</option>
+                  <option value="futsu">ふつう</option>
+                  <option value="shindoi">しんどい</option>
+                  <option value="rest">休息</option>
+                </select>
+              </label>
+
+              <label class="pastField pastSpan2">
+                <span class="pastLabel">運動メニュー（任意）</span>
+                <input id="pastMenu" type="text" placeholder="例：Fit Boxing" />
+              </label>
+
+              <label class="pastField">
+                <span class="pastLabel">歩数</span>
+                <input id="pastSteps" type="number" inputmode="numeric" placeholder="0でもOK" />
+              </label>
+
+              <label class="pastField">
+                <span class="pastLabel">運動（分）</span>
+                <input id="pastMins" type="number" inputmode="numeric" placeholder="0でもOK" />
+              </label>
+            </div>
+
+            <div class="pastActions">
+              <button class="hBtn export" id="btnPastSave" type="button">追加</button>
+              <button class="hBtn clear" id="btnPastCancel" type="button">閉じる</button>
+            </div>
+
+            <div class="error" id="pastErr">日付・歩数・分は空欄NGです（0でもOK）。</div>
+          </div>
+        </div>
+
         <div id="historyList" class="list"></div>
       </div>
     </section>
@@ -651,6 +735,18 @@
     const btnBackHome = document.getElementById("btnBackHome");
     const btnGoHistory = document.getElementById("btnGoHistory");
 
+    // ✅ 過去分追加DOM
+    const btnAddPast = document.getElementById("btnAddPast");
+    const pastForm = document.getElementById("pastForm");
+    const pastDate = document.getElementById("pastDate");
+    const pastMood = document.getElementById("pastMood");
+    const pastMenu = document.getElementById("pastMenu");
+    const pastSteps = document.getElementById("pastSteps");
+    const pastMins = document.getElementById("pastMins");
+    const btnPastSave = document.getElementById("btnPastSave");
+    const btnPastCancel = document.getElementById("btnPastCancel");
+    const pastErr = document.getElementById("pastErr");
+
     // ====== Utility ======
     const pad = (n)=> String(n).padStart(2,"0");
     const todayKey = ()=>{
@@ -674,38 +770,52 @@
     }
     function saveState(s){ localStorage.setItem(STATE_KEY, JSON.stringify(s)); }
 
+    function isBlank(v){ return v === null || v === undefined || String(v).trim() === ""; }
+
+    // ✅ 日付/時間で並び替え（新しい順）
+    function sortLogsByDateTimeDesc(logs){
+      return logs.sort((a,b)=>{
+        const ka = `${a.date} ${a.time}`;
+        const kb = `${b.date} ${b.time}`;
+        return kb.localeCompare(ka);
+      });
+    }
+
     // ====== ✅ フィット系（タイトル / 数字） ======
 
+    // タイトル：親幅に収まるまで縮める（measure方式）
     function fitMenuTitle(){
-  if(!menuTitle) return;
+      if(!menuTitle) return;
+      const parent = menuTitle.parentElement;
+      if(!parent) return;
 
-  const measure = document.createElement("span");
-  const cs = getComputedStyle(menuTitle);
-  measure.style.position = "absolute";
-  measure.style.visibility = "hidden";
-  measure.style.whiteSpace = "pre";
-  measure.style.fontFamily = cs.fontFamily;
-  measure.style.fontWeight = cs.fontWeight;
-  measure.style.letterSpacing = cs.letterSpacing;
-  document.body.appendChild(measure);
+      const measure = document.createElement("span");
+      const cs = getComputedStyle(menuTitle);
+      measure.style.position = "absolute";
+      measure.style.visibility = "hidden";
+      measure.style.whiteSpace = "pre";
+      measure.style.fontFamily = cs.fontFamily;
+      measure.style.fontWeight = cs.fontWeight;
+      measure.style.letterSpacing = cs.letterSpacing;
+      document.body.appendChild(measure);
 
-  const text = menuTitle.textContent || "";
-  const maxPx = 44, minPx = 16;
-  let size = maxPx;
+      const text = menuTitle.textContent || "";
+      const maxPx = 44, minPx = 20;
+      let size = maxPx;
 
-  // ✅ 「menuTitle 自身の表示幅」を基準にする（親じゃなくてOK）
-  const available = menuTitle.getBoundingClientRect().width;
+      const available = parent.getBoundingClientRect().width;
 
-  while(size > minPx){
-    measure.style.fontSize = size + "px";
-    measure.textContent = text;
-    if(measure.getBoundingClientRect().width <= available) break;
-    size -= 1;
-  }
-  menuTitle.style.fontSize = size + "px";
-  measure.remove();
-}
+      while(size > minPx){
+        measure.style.fontSize = size + "px";
+        measure.textContent = text;
+        if(measure.getBoundingClientRect().width <= available) break;
+        size -= 1;
+      }
+      menuTitle.style.fontSize = size + "px";
+      measure.remove();
+    }
 
+    // 入力：5桁でも収まるまで縮める（単位ぶんの幅を引く）
     function fitNumberInput(input){
       const wrap = input.parentElement;
       if(!wrap) return;
@@ -883,7 +993,6 @@
     }
 
     // ====== Validation ======
-    function isBlank(v){ return v === null || v === undefined || String(v).trim() === ""; }
     function validateInputs(){
       if(isBlank(stepsInput.value) || isBlank(minsInput.value)){
         err.classList.add("show");
@@ -896,7 +1005,7 @@
     // ====== Logging ======
     function addLog({mood, menu, steps, mins}){
       const logs = loadLogs();
-      logs.unshift({
+      logs.push({
         id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random(),
         date: todayKey(),
         time: nowTime(),
@@ -906,8 +1015,24 @@
         steps: Number(steps),
         mins: Number(mins)
       });
-      saveLogs(logs);
+      saveLogs(sortLogsByDateTimeDesc(logs));
       lastLine.textContent = `記録: ${todayKey()} ${nowTime()} / ${MENUS[mood].label} / ${menu} / ${steps}歩 / ${mins}分`;
+    }
+
+    // ✅ 過去分を追加（時刻は固定 12:00）
+    function addPastLog({date, mood, menu, steps, mins}){
+      const logs = loadLogs();
+      logs.push({
+        id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random(),
+        date,
+        time: "12:00",
+        mood,
+        moodLabel: MENUS[mood].label,
+        menu: (menu && String(menu).trim()) ? String(menu).trim() : "（未入力）",
+        steps: Number(steps),
+        mins: Number(mins)
+      });
+      saveLogs(sortLogsByDateTimeDesc(logs));
     }
 
     function computeStreak(){
@@ -930,7 +1055,7 @@
 
     // ====== History ======
     function renderHistory(){
-      const logs = loadLogs();
+      const logs = sortLogsByDateTimeDesc(loadLogs());
       historyList.innerHTML = "";
 
       if(!logs.length){
@@ -955,7 +1080,7 @@
         del.textContent = "消す";
         del.onclick = ()=>{
           const next = loadLogs().filter(x=>x.id!==item.id);
-          saveLogs(next);
+          saveLogs(sortLogsByDateTimeDesc(next));
           renderHistory();
         };
 
@@ -966,7 +1091,7 @@
     }
 
     function exportCSV(){
-      const logs = loadLogs();
+      const logs = sortLogsByDateTimeDesc(loadLogs());
       if(!logs.length){
         alert("履歴が空です");
         return;
@@ -974,6 +1099,7 @@
       const header = ["date","time","mood","menu","steps","mins"];
       const lines = [header.join(",")];
 
+      // 古い→新しい順で吐き出し（Excelで見やすい）
       logs.slice().reverse().forEach(x=>{
         const esc = (s)=> `"${String(s).replaceAll('"','""')}"`;
         lines.push([esc(x.date), esc(x.time), esc(x.moodLabel), esc(x.menu), x.steps, x.mins].join(","));
@@ -990,6 +1116,25 @@
       URL.revokeObjectURL(url);
     }
 
+    // ====== 過去分フォーム：開閉 ======
+    function openPastForm(){
+      pastForm.classList.add("show");
+      pastForm.setAttribute("aria-hidden","false");
+      pastErr.classList.remove("show");
+
+      pastDate.value = todayKey();
+      pastMood.value = (loadState().mood || "genki");
+      pastMenu.value = "";
+      pastSteps.value = "";
+      pastMins.value = "";
+    }
+
+    function closePastForm(){
+      pastForm.classList.remove("show");
+      pastForm.setAttribute("aria-hidden","true");
+      pastErr.classList.remove("show");
+    }
+
     // ====== Events ======
     moodTabs.addEventListener("click", (e)=>{
       const btn = e.target.closest(".mood");
@@ -1000,12 +1145,7 @@
     // ✅ 入力するたびにフィット
     stepsInput.addEventListener("input", ()=> fitNumberInput(stepsInput));
     minsInput.addEventListener("input", ()=> fitNumberInput(minsInput));
-
-    // ✅ 回転/リサイズでも崩れない
     window.addEventListener("resize", ()=> setTimeout(refitAll, 0));
-
-    // ✅ 画像/レイアウト確定後も再フィット
-    window.addEventListener("load", ()=> setTimeout(refitAll, 0));
 
     btnDone.addEventListener("click", ()=>{
       if(!validateInputs()) return;
@@ -1047,6 +1187,7 @@
     navHistory.addEventListener("click", ()=> showScreen("history"));
     btnBackHome.addEventListener("click", ()=> showScreen("home"));
     btnGoHistory.addEventListener("click", ()=> showScreen("history"));
+
     btnExport.addEventListener("click", exportCSV);
 
     btnClear.addEventListener("click", ()=>{
@@ -1056,13 +1197,38 @@
       }
     });
 
+    // ✅ 過去分追加（C）
+    btnAddPast?.addEventListener("click", ()=>{
+      if(pastForm.classList.contains("show")) closePastForm();
+      else openPastForm();
+    });
+    btnPastCancel?.addEventListener("click", closePastForm);
+
+    btnPastSave?.addEventListener("click", ()=>{
+      const date = pastDate.value;
+      const mood = pastMood.value;
+      const menu = pastMenu.value;
+      const steps = pastSteps.value;
+      const mins = pastMins.value;
+
+      if(isBlank(date) || isBlank(steps) || isBlank(mins)){
+        pastErr.classList.add("show");
+        return;
+      }
+      pastErr.classList.remove("show");
+
+      addPastLog({ date, mood, menu, steps, mins });
+      renderHistory();
+      closePastForm();
+    });
+
     // ====== Init ======
     (function init(){
       const st = loadState();
       const mood = st.mood || "genki";
       applyMood(mood);
 
-      const logs = loadLogs();
+      const logs = sortLogsByDateTimeDesc(loadLogs());
       if(logs.length){
         const x = logs[0];
         lastLine.textContent = `記録: ${x.date} ${x.time} / ${x.moodLabel} / ${x.menu} / ${x.steps}歩 / ${x.mins}分`;
@@ -1071,14 +1237,7 @@
       }
 
       setFlameThemeForStreak(computeStreak());
-
-      // ✅ 初回フィット（まず1回）
       setTimeout(refitAll, 0);
-
-      // ✅ フォント確定後にもう1回（iOSで超効く）
-      if (document.fonts && document.fonts.ready) {
-        document.fonts.ready.then(() => setTimeout(refitAll, 0));
-      }
     })();
   </script>
 </body>
